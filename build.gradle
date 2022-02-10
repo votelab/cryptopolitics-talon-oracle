@@ -31,6 +31,11 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
 
+    implementation('commons-codec:commons-codec:1.5')
+
+    // swagger
+    annotationProcessor("io.micronaut.openapi:micronaut-openapi:2.5.0")
+    implementation("io.swagger.core.v3:swagger-annotations")
 }
 
 

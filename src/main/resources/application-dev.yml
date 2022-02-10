@@ -1,0 +1,25 @@
+micronaut:
+  security:
+    reject-not-found: false
+  server:
+    port: 40006
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+
+endpoints:
+  loggers:
+    enabled: true
+    sensitive: false
+    write-sensitive: false
+  all:
+    port: 40006
+
+talon:
+  generators:
+    - name: cryptopolitics-dev
+      value: "Some unguessable value used as random seed"
+      size: 10000000
+      preloaded: true

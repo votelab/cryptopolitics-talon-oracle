@@ -1,0 +1,266 @@
+openapi: 3.0.1
+info:
+  title: Cryptopolitics Selection
+  description: Cryptopolitics talon transformations engine
+  contact:
+    name: InBlocks developers
+    url: https://inblocks.io/
+    email: contact@inblocks.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: "1.0"
+paths:
+  /talon/applyTransformations:
+    post:
+      summary: Compute the result of applying transformation(s) to a talon
+      description: "Given a talon and a list of transformations, return the transformed\
+        \ talon and the list of results of each transformation"
+      operationId: applyTransformations
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TalonController.ApplyTransformationQuery'
+        required: true
+      responses:
+        "200":
+          description: "Valid transformations, return the list of their results and\
+            \ the new talon state"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResult'
+        "400":
+          description: "No such class, serie or card; or a requested class was empty."
+        "409":
+          description: Talon or card already exist.
+  /talon/checkTransformations:
+    post:
+      summary: Check that a persisted talon results are consistent
+      description: "Apply the list of transformations to the persisted talonBefore\
+        \ state, using the persisted random seed, and check that the results match"
+      operationId: checkTransformations
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersistedTalon'
+        required: true
+      responses:
+        "200":
+          description: Results match persisted results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        "409":
+          description: Computed results and persisted results don't match
+  /talon/seedGenerator/{generatorName}/{seedIndex}:
+    get:
+      operationId: getSeed
+      parameters:
+      - name: generatorName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: seedIndex
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: getSeed 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+components:
+  schemas:
+    AddCardsTransformation:
+      required:
+      - cards
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    ApplyResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Object'
+        talon:
+          $ref: '#/components/schemas/Talon'
+    Card:
+      required:
+      - orderNumber
+      - originalClass
+      - serieName
+      type: object
+      properties:
+        originalClass:
+          type: string
+        serieName:
+          type: string
+        orderNumber:
+          type: integer
+          format: int32
+    CardClass:
+      required:
+      - cardClass
+      - series
+      type: object
+      properties:
+        cardClass:
+          type: string
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardSerie'
+    CardSerie:
+      required:
+      - initialDealIndex
+      - name
+      - setBitmap
+      - size
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+          format: int32
+        setBitmap:
+          type: string
+          description: Base64 encoding of the bitmap of cards present
+          example: A////w==
+        initialDealIndex:
+          type: integer
+          format: int32
+    ChestType:
+      type: string
+      enum:
+      - COMMON_FREE
+      - COMMON
+      - RARE
+      - EPIC
+      - LEGENDARY
+      - ETERNAL
+    ExtendTalonTransformation:
+      required:
+      - additionalCards
+      type: object
+      properties:
+        additionalCards:
+          $ref: '#/components/schemas/Talon'
+    InitTransformation:
+      required:
+      - setup
+      type: object
+      properties:
+        setup:
+          $ref: '#/components/schemas/Talon'
+    Object:
+      type: object
+    OpenChestTransformation:
+      required:
+      - chestType
+      type: object
+      properties:
+        results:
+          $ref: '#/components/schemas/Object'
+        chestType:
+          $ref: '#/components/schemas/ChestType'
+        pickCardsTransformation:
+          $ref: '#/components/schemas/PickCardsTransformation'
+    PersistedTalon:
+      required:
+      - results
+      - talonBefore
+      - transformations
+      - version
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int64
+        talonBefore:
+          $ref: '#/components/schemas/Talon'
+        transformations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transformation'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Object'
+    PickCardsTransformation:
+      required:
+      - cardClasses
+      type: object
+      properties:
+        results:
+          $ref: '#/components/schemas/Object'
+        cardClasses:
+          type: array
+          items:
+            type: string
+        pickedCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    Talon:
+      required:
+      - classes
+      - seed
+      - seedGeneratorName
+      - seedIndex
+      - timestamp
+      type: object
+      properties:
+        classes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardClass'
+        timestamp:
+          type: string
+          format: date-time
+        seedGeneratorName:
+          type: string
+        seedIndex:
+          type: integer
+          format: int64
+        seed:
+          type: string
+    TalonController.ApplyTransformationQuery:
+      required:
+      - transformations
+      type: object
+      properties:
+        talon:
+          allOf:
+          - $ref: '#/components/schemas/Talon'
+          - nullable: true
+        transformations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transformation'
+    Transformation:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/InitTransformation'
+      - $ref: '#/components/schemas/PickCardsTransformation'
+      - $ref: '#/components/schemas/AddCardsTransformation'
+      - $ref: '#/components/schemas/OpenChestTransformation'
+      - $ref: '#/components/schemas/ExtendTalonTransformation'

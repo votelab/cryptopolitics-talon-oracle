@@ -1,0 +1,5 @@
+talon:
+  generators:
+    - name: tests
+      value: "Some just as much unguessable value used as random seed"
+      size: 10000

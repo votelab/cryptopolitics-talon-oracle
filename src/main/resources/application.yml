@@ -1,3 +1,22 @@
 micronaut:
   application:
     name: selection
+
+  # TODO
+  #  caches:
+  #    ledger:
+  #      maximum-size: 1000
+  #      expire-after-write: 24h
+  server:
+    cors:
+      enabled: true
+    thread-selection: IO
+    netty:
+      access-logger:
+        enabled: true
+        log-format: common
+
+jackson:
+  serialization:
+    FAIL_ON_UNKNOWN_PROPERTIES: false
+    WRITE_DATES_AS_TIMESTAMPS: false

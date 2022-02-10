@@ -1,24 +1,59 @@
-## Micronaut 3.1.3 Documentation
 
-- [User Guide](https://docs.micronaut.io/3.1.3/guide/index.html)
-- [API Reference](https://docs.micronaut.io/3.1.3/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/3.1.3/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+Cryptopolitics Selection
+------------------------
 
-## Feature openapi documentation
+![Software under MIT License](https://opensource.org/licenses/MIT)
 
-- [Micronaut OpenAPI Support documentation](https://micronaut-projects.github.io/micronaut-openapi/latest/guide/index.html)
+This is version 1.0 of the Cryptopolitics Selection microservice. 
+It's made public so that anybody can replay Cryptopolitics talon transitions.
 
-- [https://www.openapis.org](https://www.openapis.org)
+It is written in Java 17 with Micronaut, using Gradle as build manager.
 
-## Feature lombok documentation
+More documentation can be found in subdirectory [/docs](docs) 
 
-- [Micronaut Project Lombok documentation](https://docs.micronaut.io/latest/guide/index.html#lombok)
+### Compilation
 
-- [https://projectlombok.org/features/all](https://projectlombok.org/features/all)
+If you have Java 17 installed, you can compile it using
 
-## Feature http-client documentation
+```shell
+./gradlew build
+```
 
-- [Micronaut HTTP Client documentation](https://docs.micronaut.io/latest/guide/index.html#httpClient)
+Otherwise, you can use Docker to build this service in a container
 
+```shell
+docker build -t "cryptopolitics-selection:1.0" .
+```
+
+### Execution
+
+The Micronaut microservice can be run straight from Gradle
+
+```shell
+export MICRONAUT_ENVIRONMENTS=dev
+./gradlew run
+```
+
+or using Docker
+
+```shell
+docker run -e MICRONAUT_ENVIRONMENTS=dev "cryptopolitics-selection:1.0"
+```
+
+### Usage
+
+To verify a transition document, send it to the `/talon/checkTransformations` 
+endpoint, that will return either a `200` status if it computes the same
+results by evaluating the embedded transformations starting from the 
+talonBefore embedded state and embedded seed value, or a `409` if the
+results don't match.
+
+You can also use the `/talon/applyTransformations` to get the results and
+end talon state from evaluating a list of transformations on a talon state.
+The seedGeneratorName used in the talon will be used to generate the random
+seeds used during the evaluation. It must reference a generator described 
+in the microservice configuration `talon.generators`.
+
+Finally, you can query the `/talon/seedGenerator` endpoint to check how the
+provable random seeds generator works. Again the generator name must match
+one described in the microservice configuration.
