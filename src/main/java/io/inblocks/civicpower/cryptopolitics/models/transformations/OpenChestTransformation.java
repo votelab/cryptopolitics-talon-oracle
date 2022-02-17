@@ -15,6 +15,7 @@ import java.util.Random;
 @Introspected
 public class OpenChestTransformation implements Transformation {
 
+  private static final String FREE_CARD_CLASS = "FREE";
   private static final String COMMON_CARD_CLASS = "COMMON";
   private static final String RARE_CARD_CLASS = "RARE";
   private static final String EPIC_CARD_CLASS = "EPIC";
@@ -31,10 +32,10 @@ public class OpenChestTransformation implements Transformation {
   private List<String> getCardClasses(ChestType chestType, Random r) {
     final List<String> cardClasses = new ArrayList<>();
       switch (chestType) {
-          case COMMON_FREE -> {
-              cardClasses.add(COMMON_CARD_CLASS);
-              cardClasses.add(COMMON_CARD_CLASS);
-              cardClasses.add(COMMON_CARD_CLASS);
+          case FREE -> {
+              cardClasses.add(FREE_CARD_CLASS);
+              cardClasses.add(FREE_CARD_CLASS);
+              cardClasses.add(FREE_CARD_CLASS);
           }
           case COMMON -> {
               cardClasses.add(COMMON_CARD_CLASS);

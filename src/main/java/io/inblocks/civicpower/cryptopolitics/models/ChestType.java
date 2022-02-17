@@ -4,7 +4,7 @@ import io.micronaut.core.annotation.Introspected;
 
 @Introspected
 public enum ChestType {
-    COMMON_FREE,
+    FREE,
     COMMON,
     RARE,
     EPIC,

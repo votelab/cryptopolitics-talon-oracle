@@ -18,6 +18,10 @@ import java.util.Objects;
 public class Talon {
   @NotNull public final List<CardClass> classes;
 
+  public void checkFinitudeConsistency() {
+    classes.forEach(CardClass::checkFinitudeConsistency);
+  }
+
   public PickNextCardResult pickNextCard(String classToPickFrom, long seed) {
     CardClass cardClass = getCardClassDataByClass(classToPickFrom);
     CardClass.PickNextCardResult pick = cardClass.pickNextCard(seed);

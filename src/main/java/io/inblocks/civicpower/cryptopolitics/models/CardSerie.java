@@ -19,36 +19,50 @@ import java.util.Objects;
 @Builder(toBuilder = true)
 public class CardSerie {
     @NotNull public final String name;
-    public final int size;
+    public final Integer size;
     @Schema(description = "Base64 encoding of the bitmap of cards present", implementation = String.class, example = "A////w==")
-    @NotNull public final BigInteger setBitmap; // BitSet another possibility
+    public final BigInteger setBitmap; // BitSet another possibility  // finite series
+    public final Integer unminted;                                    // infinite series
     @NotNull public final Integer initialDealIndex;
 
-    public CardSerie(final String name, final int size) {
+    public CardSerie(final String name, final Integer size) {
         this.name = name;
         this.size = size;
-        setBitmap = BigInteger.ONE.shiftLeft(size).subtract(BigInteger.ONE);
+        setBitmap = isInfinite() ? null : BigInteger.ONE.shiftLeft(size).subtract(BigInteger.ONE);
+        unminted = isInfinite() ? 0 : null;
         initialDealIndex = 0;
+    }
+
+    boolean isInfinite() {
+        return size == null;
     }
 
     public CardSerie removeCard(final int orderNumber) throws NoSuchCard {
         checkOrderNumber(orderNumber);
-        final int index = orderNumber - 1;
-        if (!setBitmap.testBit(index))
-            throw new NoSuchCard(orderNumber);
-        return toBuilder().setBitmap(setBitmap.clearBit(index)).build();
+        if (isInfinite())
+            return this;
+        else {
+            final int index = orderNumber - 1;
+            if (!setBitmap.testBit(index))
+                throw new NoSuchCard(orderNumber);
+            return toBuilder().setBitmap(setBitmap.clearBit(index)).build();
+        }
     }
 
     public CardSerie addCard(final int orderNumber) throws CardAlreadyPresent {
         checkOrderNumber(orderNumber);
-        final int index = orderNumber - 1;
-        if (setBitmap.testBit(index))
-            throw new CardAlreadyPresent(orderNumber);
-        return toBuilder().setBitmap(setBitmap.setBit(index)).build();
+        if (isInfinite())
+            return toBuilder().unminted(unminted + 1).build();
+        else {
+            final int index = orderNumber - 1;
+            if (setBitmap.testBit(index))
+                throw new CardAlreadyPresent(orderNumber);
+            return toBuilder().setBitmap(setBitmap.setBit(index)).build();
+        }
     }
 
     private void checkOrderNumber(int orderNumber) {
-        if (orderNumber < 1 || orderNumber > size)
+        if (orderNumber < 1 || orderNumber > (isInfinite() ? initialDealIndex : size))
             throw new IllegalArgumentException("Card order number out of bounds");
     }
 
@@ -60,9 +74,9 @@ public class CardSerie {
     }
 
     public PickNextCardResult pickNextCard() {
-        if (initialDealIndex < size) {
+        if (isInfinite() || initialDealIndex < size) {
             final int deal = initialDealIndex + 1;
-            final CardSerie cardsLeft = removeCard(deal).toBuilder().initialDealIndex(deal).build();
+            final CardSerie cardsLeft = toBuilder().initialDealIndex(deal).build().removeCard(deal);
             return PickNextCardResult.builder()
                     .cardOrderNumber(deal)
                     .remainingCards(cardsLeft)
@@ -87,11 +101,11 @@ public class CardSerie {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CardSerie that = (CardSerie) o;
-        return size == that.size && name.equals(that.name) && setBitmap.equals(that.setBitmap) && initialDealIndex.equals(that.initialDealIndex);
+        return Objects.equals(size, that.size) && name.equals(that.name) && Objects.equals(setBitmap, that.setBitmap) && Objects.equals(unminted, that.unminted) && initialDealIndex.equals(that.initialDealIndex);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size, setBitmap, initialDealIndex);
+        return Objects.hash(name, size, setBitmap, unminted, initialDealIndex);
     }
 }

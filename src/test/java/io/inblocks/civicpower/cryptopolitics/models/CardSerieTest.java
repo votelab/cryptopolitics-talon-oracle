@@ -86,4 +86,31 @@ class CardSerieTest {
         final CardSerie addBackNextCardSerie = dealFirst.addCard(2).addCard(3);
         Assertions.assertEquals(3, addBackNextCardSerie.pickNextCard().cardOrderNumber);
     }
+
+    @Test
+    void createInfiniteSerie() {
+        final CardSerie finiteSerie = new CardSerie("test", 3);
+        Assertions.assertFalse(finiteSerie.isInfinite());
+        final CardSerie infiniteSerie = new CardSerie("test", null);
+        Assertions.assertTrue(infiniteSerie.isInfinite());
+    }
+
+    @Test
+    void removeCardsFrominfiniteSerie() {
+        final CardSerie infiniteSerie = new CardSerie("test", null);
+        CardSerie.PickNextCardResult pickNextCardResult1 = infiniteSerie.pickNextCard();
+        Assertions.assertEquals(1, pickNextCardResult1.cardOrderNumber);
+        CardSerie.PickNextCardResult pickNextCardResult2 = pickNextCardResult1.remainingCards.pickNextCard();
+        Assertions.assertEquals(2, pickNextCardResult2.cardOrderNumber);
+        Assertions.assertEquals(2, pickNextCardResult2.remainingCards.initialDealIndex);
+    }
+
+    @Test
+    void addACardToInfiniteSerie() {
+        final CardSerie.PickNextCardResult pickNextCardResult1 = new CardSerie("test", null).pickNextCard();
+        CardSerie revertedSerie = pickNextCardResult1.remainingCards.addCard(pickNextCardResult1.cardOrderNumber);
+        Assertions.assertEquals(1, revertedSerie.unminted);
+        final CardSerie.PickNextCardResult pickNextCardResult2 = revertedSerie.pickNextCard();
+        Assertions.assertEquals(2, pickNextCardResult2.cardOrderNumber);
+    }
 }

@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 @MicronautTest
-class CardClassDataTest {
+class CardClassTest {
 
     private final String COMMON_CLASS = "Common";
 
@@ -58,5 +58,22 @@ class CardClassDataTest {
         CardClass restoredCardClass = cardClass.addCard(new Card(COMMON_CLASS, "blue", 1));
         Assertions.assertEquals(2, restoredCardClass.getSerieByName("blue").count());
         Assertions.assertEquals(3, restoredCardClass.getSerieByName("orange").count());
+    }
+
+    @Test
+    void dealFromSingleInfiniteSerie() {
+        final CardClass infiniteCardClassOfOneSerie = CardClass.builder().cardClass(COMMON_CLASS).isInfinite(true).series(Collections.singletonList(
+                new CardSerie("test", null))).build();
+        final CardClass.PickNextCardResult result1 = infiniteCardClassOfOneSerie.pickNextCard(r.nextLong());
+        Assertions.assertEquals(new Card(COMMON_CLASS, "test", 1), result1.card);
+        final CardClass.PickNextCardResult result2 = result1.remainingCards.pickNextCard(r.nextLong());
+        Assertions.assertEquals(new Card(COMMON_CLASS, "test", 2), result2.card);
+    }
+
+    @Test
+    void noInfiniteCount() {
+        final CardClass infiniteCardClassOfOneSerie = CardClass.builder().cardClass(COMMON_CLASS).isInfinite(true).series(Collections.singletonList(
+                new CardSerie("test", null))).build();
+        Assertions.assertNull(infiniteCardClassOfOneSerie.count());
     }
 }

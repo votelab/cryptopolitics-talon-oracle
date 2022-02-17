@@ -19,6 +19,7 @@ public class InitTransformation implements Transformation {
     public InitTransformation(final Talon setup, final SeedGeneratorParams seedGenerator) {
         this.setup = setup;
         this.seedGenerator = seedGenerator;
+        setup.checkFinitudeConsistency();
     }
 
     @Override
