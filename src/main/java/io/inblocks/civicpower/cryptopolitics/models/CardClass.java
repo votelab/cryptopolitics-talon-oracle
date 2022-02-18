@@ -10,6 +10,7 @@ import io.micronaut.core.annotation.Introspected;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +25,7 @@ public class CardClass {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     protected final boolean isInfinite;
     @NotNull
-    public final List<CardSerie> series;
+    public final List<@Valid CardSerie> series;
 
     static final long LONG_MASK = 0xffffffffL;
 

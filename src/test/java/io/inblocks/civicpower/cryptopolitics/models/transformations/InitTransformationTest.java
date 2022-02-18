@@ -1,5 +1,6 @@
 package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
+import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.TalonAlreadyInitialized;
 import io.inblocks.civicpower.cryptopolitics.models.*;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -72,5 +73,36 @@ class InitTransformationTest extends TransformationTest {
     Assertions.assertEquals(setup, talon);
     Assertions.assertNull(init.getResults());
     Assertions.assertEquals(seedGeneratorParams, context.getSeedGeneratorParams());
+  }
+
+  @Test
+  void cantUseInfiniteSerieInFiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                            .cardClass("COMMON")
+                            .series(List.of(new CardSerie("pique", null)))
+                    .build()))
+            .build();
+    SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()
+            .name("tests")
+            .index(9000L)
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new InitTransformation(setup, seedGeneratorParams));
+  }
+
+  @Test
+  void cantUseFiniteSerieInInfiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                            .isInfinite(true)
+                    .series(List.of(new CardSerie("pique", 3)))
+                    .build()))
+            .build();
+    SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()
+            .name("tests")
+            .index(9000L)
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new InitTransformation(setup, seedGeneratorParams));
   }
 }

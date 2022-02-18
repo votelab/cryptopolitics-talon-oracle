@@ -1,11 +1,13 @@
 package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
+import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.models.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 class ExtendTalonTransformationTest extends TransformationTest {
 
@@ -149,6 +151,92 @@ class ExtendTalonTransformationTest extends TransformationTest {
     // Then the remaining card
     PickNextCardResult pick3 = pick2.remainingCards.pickNextCard("COMMON", 42);
     Assertions.assertEquals(new Card("COMMON", "first", 1), pick3.card);
+  }
+
+  @Test
+  void cantUseInfiniteSerieInFiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .series(List.of(new CardSerie("pique", null)))
+                    .build()))
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new ExtendTalonTransformation(setup));
+  }
+
+  @Test
+  void cantUseFiniteSerieInInfiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .isInfinite(true)
+                    .series(List.of(new CardSerie("pique", 3)))
+                    .build()))
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new ExtendTalonTransformation(setup));
+  }
+
+  @Test
+  void extentTalonPreservesFinitude() {
+    Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .series(List.of(new CardSerie("INITIAL_FINITE", 3))).build(),
+            CardClass.builder()
+                    .cardClass("FREE")
+                    .isInfinite(true)
+                    .series(List.of(new CardSerie("INITIAL_INFINITE", null)))
+            .build())).build();
+    Talon extraTalon = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                            .cardClass("COMMON")
+                            .series(List.of(new CardSerie("NEW_FINITE", 4)))
+                    .build(), CardClass.builder()
+                            .cardClass("FREE")
+                            .isInfinite(true)
+                            .series(List.of(new CardSerie("NEW_INFINITE", null)))
+                    .build()))
+            .build();
+    ExtendTalonTransformation transformation =
+            new ExtendTalonTransformation(extraTalon);
+    Talon newTalon = transformation.apply(makeSomeContext(), firstTalon);
+    CardClass commonClass = newTalon.getCardClassDataByClass("COMMON");
+    Assertions.assertEquals(2, commonClass.getSeries().size());
+    CardClass freeClass = newTalon.getCardClassDataByClass("FREE");
+    Assertions.assertEquals(2, freeClass.getSeries().size());
+  }
+
+  @Test
+  void canExtendFiniteClassWithInfiniteClass() {
+    Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .series(List.of(new CardSerie("INITIAL_FINITE", 3))).build())).build();
+    Talon extraTalon = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .isInfinite(true)
+                    .series(List.of(new CardSerie("NEW_INFINITE", null)))
+                    .build()))
+            .build();
+    ExtendTalonTransformation transformation =
+            new ExtendTalonTransformation(extraTalon);
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () -> transformation.apply(makeSomeContext(), firstTalon));
+  }
+
+  @Test
+  void canExtendInfiniteClassWithfiniteClass() {
+    Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
+            .cardClass("COMMON")
+            .isInfinite(true)
+            .series(List.of(new CardSerie("INITIAL_INFINITE", null))).build())).build();
+    Talon extraTalon = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .series(List.of(new CardSerie("NEW_FINITE", 3)))
+                    .build()))
+            .build();
+    ExtendTalonTransformation transformation =
+            new ExtendTalonTransformation(extraTalon);
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () -> transformation.apply(makeSomeContext(), firstTalon));
   }
 
   private Talon getInitialTalon() {

@@ -1,5 +1,6 @@
 package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
+import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
 import io.inblocks.civicpower.cryptopolitics.models.*;
@@ -16,6 +17,7 @@ public class ExtendTalonTransformation implements Transformation {
 
   public ExtendTalonTransformation(final Talon additionalCards) {
     this.additionalCards = additionalCards;
+    additionalCards.checkFinitudeConsistency();
   }
 
   @Override
@@ -24,14 +26,14 @@ public class ExtendTalonTransformation implements Transformation {
   }
 
   private Talon mergeTalon(Talon in, Talon additionalCards) {
-    return Talon.builder()
+      return Talon.builder()
         .classes(
             Stream.concat(mergeClasses(in, additionalCards), addNewClasses(in, additionalCards))
                 .toList())
         .build();
   }
 
-  private Stream<CardClass> mergeClasses(Talon in, Talon additionalCards) {
+    private Stream<CardClass> mergeClasses(Talon in, Talon additionalCards) {
     return in.classes.stream()
         .map(
             cardClassData -> {
@@ -41,6 +43,7 @@ public class ExtendTalonTransformation implements Transformation {
               } catch (NoSuchCardClass e) {
                 return cardClassData;
               }
+              checkClassesCompatibility(cardClassData, extra);
               return cardClassData.toBuilder()
                   .series(
                       Stream.concat(
@@ -50,7 +53,12 @@ public class ExtendTalonTransformation implements Transformation {
             });
   }
 
-  private Stream<CardSerie> mergeSeries(CardClass cardClass, CardClass extraCardClass) {
+    private void checkClassesCompatibility(CardClass cardClassData, CardClass extra) {
+        if (cardClassData.isInfinite() != extra.isInfinite())
+            throw new CardClassFinitudeMismatch(extra.cardClass);
+    }
+
+    private Stream<CardSerie> mergeSeries(CardClass cardClass, CardClass extraCardClass) {
     return cardClass.series.stream()
         .map(
             cardSerieData -> {
@@ -60,8 +68,7 @@ public class ExtendTalonTransformation implements Transformation {
               } catch (NoSuchCardSerie e) {
                 return cardSerieData;
               }
-              if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
-                throw new IllegalArgumentException("Additional talon should be totally unused");
+              checkSeriesCompatibility(cardSerieData, extraSerie);
               final int newSize = cardSerieData.size + extraSerie.size;
               final BigInteger newSetBitmap =
                   cardSerieData.setBitmap.or(extraSerie.setBitmap.shiftLeft(cardSerieData.size));
@@ -69,7 +76,12 @@ public class ExtendTalonTransformation implements Transformation {
             });
   }
 
-  private Stream<CardSerie> addNewSeries(CardClass cardClass, CardClass extra) {
+    private void checkSeriesCompatibility(CardSerie cardSerieData, CardSerie extraSerie) {
+        if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
+            throw new IllegalArgumentException("Additional talon should be totally unused");
+    }
+
+    private Stream<CardSerie> addNewSeries(CardClass cardClass, CardClass extra) {
     return extra.series.stream()
         .flatMap(
             extraCardSerieData -> {

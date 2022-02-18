@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,7 @@ import java.util.Objects;
 @Introspected
 @Builder(toBuilder = true)
 public class Talon {
-  @NotNull public final List<CardClass> classes;
+  @NotNull public final List<@Valid CardClass> classes;
 
   public void checkFinitudeConsistency() {
     classes.forEach(CardClass::checkFinitudeConsistency);
