@@ -33,7 +33,7 @@ public class CardSerie {
         initialDealIndex = 0;
     }
 
-    boolean isInfinite() {
+    public boolean isInfinite() {
         return size == null;
     }
 

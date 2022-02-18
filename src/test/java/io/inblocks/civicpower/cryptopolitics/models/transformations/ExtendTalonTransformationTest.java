@@ -201,8 +201,12 @@ class ExtendTalonTransformationTest extends TransformationTest {
     Talon newTalon = transformation.apply(makeSomeContext(), firstTalon);
     CardClass commonClass = newTalon.getCardClassDataByClass("COMMON");
     Assertions.assertEquals(2, commonClass.getSeries().size());
+    Assertions.assertFalse(commonClass.getSerieByName("INITIAL_FINITE").isInfinite());
+    Assertions.assertFalse(commonClass.getSerieByName("NEW_FINITE").isInfinite());
     CardClass freeClass = newTalon.getCardClassDataByClass("FREE");
     Assertions.assertEquals(2, freeClass.getSeries().size());
+    Assertions.assertTrue(freeClass.getSerieByName("INITIAL_INFINITE").isInfinite());
+    Assertions.assertTrue(freeClass.getSerieByName("NEW_INFINITE").isInfinite());
   }
 
   @Test
