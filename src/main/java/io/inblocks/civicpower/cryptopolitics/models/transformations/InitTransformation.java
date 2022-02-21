@@ -8,13 +8,14 @@ import io.inblocks.civicpower.cryptopolitics.models.Transformation;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Data
 @Introspected
 public class InitTransformation implements Transformation {
-    public final Talon setup;
-    @NotNull public final SeedGeneratorParams seedGenerator;
+    @Valid @NotNull public final Talon setup;
+    @Valid @NotNull public final SeedGeneratorParams seedGenerator;
 
     public InitTransformation(final Talon setup, final SeedGeneratorParams seedGenerator) {
         this.setup = setup;

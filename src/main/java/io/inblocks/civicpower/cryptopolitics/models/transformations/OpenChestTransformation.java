@@ -7,6 +7,8 @@ import io.inblocks.civicpower.cryptopolitics.models.Transformation;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,7 +23,7 @@ public class OpenChestTransformation implements Transformation {
   private static final String EPIC_CARD_CLASS = "EPIC";
   private static final String LEGENDARY_CARD_CLASS = "LEGENDARY";
 
-  public final ChestType chestType;
+  @Valid @NotNull public final ChestType chestType;
 
   private PickCardsTransformation pickCardsTransformation;
 

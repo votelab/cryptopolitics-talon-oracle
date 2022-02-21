@@ -7,12 +7,15 @@ import io.inblocks.civicpower.cryptopolitics.models.*;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.stream.Stream;
 
 @Data
 @Introspected
 public class ExtendTalonTransformation implements Transformation {
+  @Valid @NotNull
   public final Talon additionalCards;
 
   public ExtendTalonTransformation(final Talon additionalCards) {

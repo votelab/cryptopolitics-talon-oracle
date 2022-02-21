@@ -4,6 +4,7 @@ import io.inblocks.civicpower.cryptopolitics.models.*;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Introspected
 public class PickCardsTransformation implements Transformation {
 
-    public final List<String> cardClasses;
+    @NotNull public final List<String> cardClasses;
 
     private final List<Card> pickedCards;
 

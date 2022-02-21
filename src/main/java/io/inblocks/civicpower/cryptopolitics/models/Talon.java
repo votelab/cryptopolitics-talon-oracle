@@ -17,7 +17,7 @@ import java.util.Objects;
 @Introspected
 @Builder(toBuilder = true)
 public class Talon {
-  @NotNull public final List<@Valid CardClass> classes;
+  @Valid @NotNull public final List<CardClass> classes;
 
   public void checkFinitudeConsistency() {
     classes.forEach(CardClass::checkFinitudeConsistency);

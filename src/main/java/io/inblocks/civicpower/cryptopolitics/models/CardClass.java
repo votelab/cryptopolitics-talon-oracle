@@ -24,8 +24,8 @@ public class CardClass {
     @JsonProperty(value="infinite")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     protected final boolean isInfinite;
-    @NotNull
-    public final List<@Valid CardSerie> series;
+    @Valid @NotNull
+    public final List<CardSerie> series;
 
     static final long LONG_MASK = 0xffffffffL;
 
