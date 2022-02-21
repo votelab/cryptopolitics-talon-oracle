@@ -38,7 +38,7 @@ paths:
           description: Talon or card already exist.
   /talon/checkTransformations:
     post:
-      summary: Check that a persisted talon results are consistent
+      summary: Check that persisted talon results are consistent
       description: "Apply the list of transformations to the persisted talonBefore\
         \ state, using the persisted random seed, and check that the results match"
       operationId: checkTransformations
@@ -102,6 +102,8 @@ components:
             $ref: '#/components/schemas/Object'
         talon:
           $ref: '#/components/schemas/Talon'
+        seedGenerator:
+          $ref: '#/components/schemas/SeedGeneratorParams'
     Card:
       required:
       - orderNumber
@@ -124,6 +126,8 @@ components:
       properties:
         cardClass:
           type: string
+        infinite:
+          type: boolean
         series:
           type: array
           items:
@@ -132,10 +136,11 @@ components:
       required:
       - initialDealIndex
       - name
-      - setBitmap
       - size
       type: object
       properties:
+        infinite:
+          type: boolean
         name:
           type: string
         size:
@@ -145,13 +150,16 @@ components:
           type: string
           description: Base64 encoding of the bitmap of cards present
           example: A////w==
+        unminted:
+          type: integer
+          format: int32
         initialDealIndex:
           type: integer
           format: int32
     ChestType:
       type: string
       enum:
-      - COMMON_FREE
+      - FREE
       - COMMON
       - RARE
       - EPIC
@@ -166,11 +174,14 @@ components:
           $ref: '#/components/schemas/Talon'
     InitTransformation:
       required:
+      - seedGenerator
       - setup
       type: object
       properties:
         setup:
           $ref: '#/components/schemas/Talon'
+        seedGenerator:
+          $ref: '#/components/schemas/SeedGeneratorParams'
     Object:
       type: object
     OpenChestTransformation:
@@ -187,6 +198,7 @@ components:
     PersistedTalon:
       required:
       - results
+      - seedGenerator
       - talonBefore
       - transformations
       - version
@@ -201,6 +213,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transformation'
+        seedGenerator:
+          $ref: '#/components/schemas/SeedGeneratorParams'
         results:
           type: array
           items:
@@ -220,29 +234,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Card'
+    SeedGeneratorParams:
+      required:
+      - index
+      - name
+      - seedUsed
+      type: object
+      properties:
+        name:
+          type: string
+        index:
+          type: integer
+          format: int64
+        seedUsed:
+          type: string
+          nullable: true
     Talon:
       required:
       - classes
-      - seed
-      - seedGeneratorName
-      - seedIndex
-      - timestamp
       type: object
       properties:
         classes:
           type: array
           items:
             $ref: '#/components/schemas/CardClass'
-        timestamp:
-          type: string
-          format: date-time
-        seedGeneratorName:
-          type: string
-        seedIndex:
-          type: integer
-          format: int64
-        seed:
-          type: string
     TalonController.ApplyTransformationQuery:
       required:
       - transformations
@@ -251,6 +266,10 @@ components:
         talon:
           allOf:
           - $ref: '#/components/schemas/Talon'
+          - nullable: true
+        seedGenerator:
+          allOf:
+          - $ref: '#/components/schemas/SeedGeneratorParams'
           - nullable: true
         transformations:
           type: array
