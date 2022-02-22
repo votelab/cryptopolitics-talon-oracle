@@ -4,32 +4,29 @@ import io.inblocks.civicpower.cryptopolitics.models.*;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Data
 @Introspected
 public class PickCardsTransformation implements Transformation {
 
-    @NotNull public final List<String> cardClasses;
+    @Valid @NotNull public final Selection selection;
 
-    private final List<Card> pickedCards;
+    private List<Card> pickedCards;
 
-    public PickCardsTransformation(final List<String> cardClasses) {
-        this.cardClasses = cardClasses;
-        pickedCards = new ArrayList<>();
+    public PickCardsTransformation(final Selection selection) {
+        this.selection = selection;
+        pickedCards = Collections.emptyList();
     }
 
     @Override
     public Talon apply(final Context context, final Talon in) {
-        Talon accumulator = in;
-        for (String cardClass : cardClasses) {
-            PickNextCardResult result = accumulator.pickNextCard(cardClass, context.getRandom().nextLong());
-            pickedCards.add(result.card);
-            accumulator = result.remainingCards;
-        }
-        return accumulator;
+        SelectionResult result = selection.pickCards(in, context.getRandom());
+        pickedCards = result.cards;
+        return result.remainingCards;
     }
 
     @Override
