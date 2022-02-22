@@ -1,5 +1,6 @@
 package io.inblocks.civicpower.cryptopolitics.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardAlreadyPresent;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCard;
 import io.micronaut.core.annotation.Introspected;
@@ -33,6 +34,7 @@ public class CardSerie {
         initialDealIndex = 0;
     }
 
+    @JsonIgnore
     public boolean isInfinite() {
         return size == null;
     }
@@ -68,16 +70,16 @@ public class CardSerie {
 
     @Data
     @Builder
-    public static class PickNextCardResult {
+    public static class PickCardResult {
         public final int cardOrderNumber;
         public final CardSerie remainingCards;
     }
 
-    public PickNextCardResult pickNextCard() {
+    public PickCardResult pickCard() {
         if (isInfinite() || initialDealIndex < size) {
             final int deal = initialDealIndex + 1;
             final CardSerie cardsLeft = toBuilder().initialDealIndex(deal).build().removeCard(deal);
-            return PickNextCardResult.builder()
+            return PickCardResult.builder()
                     .cardOrderNumber(deal)
                     .remainingCards(cardsLeft)
                     .build();
@@ -85,7 +87,7 @@ public class CardSerie {
         else {
             final int deal = setBitmap.bitLength();
             final CardSerie cardsLeft = removeCard(deal);
-            return PickNextCardResult.builder()
+            return PickCardResult.builder()
                     .cardOrderNumber(deal)
                     .remainingCards(cardsLeft)
                     .build();

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 @MicronautTest
@@ -27,12 +28,12 @@ class TalonTest {
                         .cardClass(COMMON_CLASS)
                         .series(
                             Collections.singletonList(
-                                new CardSerie("test", 1).pickNextCard().remainingCards))
+                                new CardSerie("test", 1).pickCard().remainingCards))
                         .build()))
             .build();
     long seed = r.nextLong();
     Assertions.assertThrows(
-        CardClassEmpty.class, () -> talon.pickNextCard(COMMON_CLASS, seed));
+        CardClassEmpty.class, () -> talon.pickCardByClass(COMMON_CLASS, seed));
   }
 
   @Test
@@ -46,8 +47,8 @@ class TalonTest {
                         .series(Collections.singletonList(new CardSerie("test", 1)))
                         .build()))
             .build();
-    PickNextCardResult pick = talon.pickNextCard(COMMON_CLASS, r.nextLong());
-    Assertions.assertEquals(new Card(COMMON_CLASS, "test", 1), pick.card);
+    SelectionResult pick = talon.pickCardByClass(COMMON_CLASS, r.nextLong());
+    Assertions.assertEquals(List.of(new Card(COMMON_CLASS, "test", 1)), pick.cards);
   }
 
   @Test
@@ -60,14 +61,14 @@ class TalonTest {
                         .cardClass(COMMON_CLASS)
                         .series(
                             Collections.singletonList(
-                                new CardSerie("test", 1).pickNextCard().remainingCards))
+                                new CardSerie("test", 1).pickCard().remainingCards))
                         .build()))
             .build();
     Talon restoredTalon = talon.addCard(new Card(COMMON_CLASS, "test", 1));
     Assertions.assertEquals(
-        0, talon.getCardClassDataByClass(COMMON_CLASS).getSerieByName("test").count());
+        0, talon.getCardClassByName(COMMON_CLASS).getCardSerieByName("test").count());
     Assertions.assertEquals(
-        1, restoredTalon.getCardClassDataByClass(COMMON_CLASS).getSerieByName("test").count());
+        1, restoredTalon.getCardClassByName(COMMON_CLASS).getCardSerieByName("test").count());
   }
 
   @Test
@@ -83,6 +84,6 @@ class TalonTest {
             .build();
     long seed = r.nextLong();
     Assertions.assertThrows(
-        NoSuchCardClass.class, () -> talon.pickNextCard(EPIC_CLASS, seed));
+        NoSuchCardClass.class, () -> talon.pickCardByClass(EPIC_CLASS, seed));
   }
 }

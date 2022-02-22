@@ -2,13 +2,12 @@ package io.inblocks.civicpower.cryptopolitics;
 
 import io.micronaut.runtime.EmbeddedApplication;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @MicronautTest
-class SelectionTest {
+class ApplicationTest {
 
     @Inject
     EmbeddedApplication<?> application;

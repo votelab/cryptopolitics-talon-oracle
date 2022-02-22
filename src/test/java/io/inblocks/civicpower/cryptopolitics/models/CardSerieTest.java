@@ -51,40 +51,40 @@ class CardSerieTest {
 
     @Test
     void cantDealOffAnEmptySerie() {
-        CardSerie serie = new CardSerie("test", 1).pickNextCard().remainingCards;
-        Assertions.assertThrows(IllegalArgumentException.class, serie::pickNextCard);
+        CardSerie serie = new CardSerie("test", 1).pickCard().remainingCards;
+        Assertions.assertThrows(IllegalArgumentException.class, serie::pickCard);
     }
 
     @Test
     void firstDealCardsInIncreasingOrderNumbers() {
         final CardSerie serie = new CardSerie("test", 2);
-        final CardSerie.PickNextCardResult result1 = serie.pickNextCard();
+        final CardSerie.PickCardResult result1 = serie.pickCard();
         Assertions.assertEquals(1, result1.cardOrderNumber);
         final CardSerie result1p = result1.remainingCards.addCard(1); // Even if we put back card #1
-        final CardSerie.PickNextCardResult result2 = result1p.pickNextCard();
+        final CardSerie.PickCardResult result2 = result1p.pickCard();
         Assertions.assertEquals(2, result2.cardOrderNumber);
     }
 
     @Test
     void laterDealDiscardedCardsOfHighestOrderNumbers() {
-        final CardSerie exhaustedSerie = new CardSerie("test", 2).pickNextCard().remainingCards.pickNextCard().remainingCards;
+        final CardSerie exhaustedSerie = new CardSerie("test", 2).pickCard().remainingCards.pickCard().remainingCards;
         final CardSerie serie = exhaustedSerie.addCard(1).addCard(2);
-        final CardSerie.PickNextCardResult result1 = serie.pickNextCard();
+        final CardSerie.PickCardResult result1 = serie.pickCard();
         Assertions.assertEquals(2, result1.cardOrderNumber);
-        final CardSerie.PickNextCardResult result2 = result1.remainingCards.pickNextCard();
+        final CardSerie.PickCardResult result2 = result1.remainingCards.pickCard();
         Assertions.assertEquals(1, result2.cardOrderNumber);
     }
 
     @Test
     void neverReturnIntoInitialDealState() {
         final CardSerie exhaustedSerie = new CardSerie("test", 3)
-                .pickNextCard().remainingCards
-                .pickNextCard().remainingCards
-                .pickNextCard().remainingCards;
+                .pickCard().remainingCards
+                .pickCard().remainingCards
+                .pickCard().remainingCards;
         final CardSerie serie = exhaustedSerie.addCard(1);
-        final CardSerie dealFirst = serie.pickNextCard().remainingCards;
+        final CardSerie dealFirst = serie.pickCard().remainingCards;
         final CardSerie addBackNextCardSerie = dealFirst.addCard(2).addCard(3);
-        Assertions.assertEquals(3, addBackNextCardSerie.pickNextCard().cardOrderNumber);
+        Assertions.assertEquals(3, addBackNextCardSerie.pickCard().cardOrderNumber);
     }
 
     @Test
@@ -98,19 +98,19 @@ class CardSerieTest {
     @Test
     void removeCardsFrominfiniteSerie() {
         final CardSerie infiniteSerie = new CardSerie("test", null);
-        CardSerie.PickNextCardResult pickNextCardResult1 = infiniteSerie.pickNextCard();
-        Assertions.assertEquals(1, pickNextCardResult1.cardOrderNumber);
-        CardSerie.PickNextCardResult pickNextCardResult2 = pickNextCardResult1.remainingCards.pickNextCard();
-        Assertions.assertEquals(2, pickNextCardResult2.cardOrderNumber);
-        Assertions.assertEquals(2, pickNextCardResult2.remainingCards.initialDealIndex);
+        CardSerie.PickCardResult pickCardResult1 = infiniteSerie.pickCard();
+        Assertions.assertEquals(1, pickCardResult1.cardOrderNumber);
+        CardSerie.PickCardResult pickCardResult2 = pickCardResult1.remainingCards.pickCard();
+        Assertions.assertEquals(2, pickCardResult2.cardOrderNumber);
+        Assertions.assertEquals(2, pickCardResult2.remainingCards.initialDealIndex);
     }
 
     @Test
     void addACardToInfiniteSerie() {
-        final CardSerie.PickNextCardResult pickNextCardResult1 = new CardSerie("test", null).pickNextCard();
-        CardSerie revertedSerie = pickNextCardResult1.remainingCards.addCard(pickNextCardResult1.cardOrderNumber);
+        final CardSerie.PickCardResult pickCardResult1 = new CardSerie("test", null).pickCard();
+        CardSerie revertedSerie = pickCardResult1.remainingCards.addCard(pickCardResult1.cardOrderNumber);
         Assertions.assertEquals(1, revertedSerie.unminted);
-        final CardSerie.PickNextCardResult pickNextCardResult2 = revertedSerie.pickNextCard();
-        Assertions.assertEquals(2, pickNextCardResult2.cardOrderNumber);
+        final CardSerie.PickCardResult pickCardResult2 = revertedSerie.pickCard();
+        Assertions.assertEquals(2, pickCardResult2.cardOrderNumber);
     }
 }

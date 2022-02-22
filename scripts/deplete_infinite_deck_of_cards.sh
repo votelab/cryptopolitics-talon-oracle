@@ -14,7 +14,7 @@ SG="$(jq -c '.seedGenerator' <<<"$RESULT")"
 cards=()
 
 while true; do
-    RESULT="$(curl -sS "$URL" -H 'Content-type: application/json' -d '{"talon":'"$TALON"', "seedGenerator":'"$SG"', "transformations":[{"type":"PickCards","cardClasses": ["COMMON"]}]}')"
+    RESULT="$(curl -sS "$URL" -H 'Content-type: application/json' -d '{"talon":'"$TALON"', "seedGenerator":'"$SG"', "transformations":[{"type":"PickCards","selection":{"type":"FromClass","cardClass": "COMMON"}}]}')"
     # Pick first card of the first transformation result
     CARD="$(jq -c '.results[0][0]' <<<"$RESULT")"
     [ "$CARD" = "null" ] && break

@@ -3,6 +3,7 @@ package io.inblocks.civicpower.cryptopolitics.models;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.inblocks.civicpower.cryptopolitics.models.contexts.SeedGeneratorContext;
+import io.inblocks.civicpower.cryptopolitics.models.selections.FromClass;
 import io.inblocks.civicpower.cryptopolitics.models.transformations.AddCardsTransformation;
 import io.inblocks.civicpower.cryptopolitics.models.transformations.InitTransformation;
 import io.inblocks.civicpower.cryptopolitics.models.transformations.PickCardsTransformation;
@@ -12,11 +13,11 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
 
 @MicronautTest
-public class TransformationTest {
+public
+class TransformationTest {
 
   @Inject ObjectMapper mapper;
 
@@ -43,7 +44,12 @@ public class TransformationTest {
 
   @Test
   void testPickCardsDeserialization() throws JsonProcessingException {
-    Transformation transformation = mapper.readValue("{\"type\": \"PickCards\", \"cardClasses\":[\"COMMON\", \"JOKERS\"]}", Transformation.class);
+    Transformation transformation = mapper.readValue("""
+    {"type": "PickCards", "selection":{
+      "type":"Together", "selections":[
+        {"type":"FromClass", "cardClass":"COMMON"},
+        {"type":"FromClass","cardClass":"JOKERS"}]}}
+    """, Transformation.class);
     Assertions.assertTrue(transformation instanceof PickCardsTransformation);
     Talon talon = mapper.readValue(serializedTalon, Talon.class);
     Talon newTalon = transformation.apply(makeSomeContext(), talon);
@@ -53,20 +59,20 @@ public class TransformationTest {
     Assertions.assertEquals(2, listResult.size());
     Assertions.assertEquals("COMMON", listResult.get(0).originalClass);
     Assertions.assertEquals("JOKERS", listResult.get(1).originalClass);
-    Assertions.assertEquals(16383, newTalon.getCardClassDataByClass("COMMON").count());
-    Assertions.assertEquals(1, newTalon.getCardClassDataByClass("JOKERS").count());
+    Assertions.assertEquals(16383, newTalon.getCardClassByName("COMMON").count());
+    Assertions.assertEquals(1, newTalon.getCardClassByName("JOKERS").count());
   }
 
   @Test
   void testAddCardsDeserialization() throws JsonProcessingException {
     Talon talon = mapper.readValue(serializedTalon, Talon.class);
-    final PickCardsTransformation pickTransformation = new PickCardsTransformation(Collections.singletonList("COMMON"));
+    final PickCardsTransformation pickTransformation = new PickCardsTransformation(new FromClass("COMMON"));
     Talon remainingCards = pickTransformation.apply(makeSomeContext(), talon);
     Card card = ((List<Card>) pickTransformation.getResults()).get(0);
 
     Transformation transformation = mapper.readValue("{\"type\":\"AddCards\", \"cards\":[" + mapper.writeValueAsString(card) + "]}", Transformation.class);
     Assertions.assertTrue(transformation instanceof AddCardsTransformation);
     Talon newTalon = transformation.apply(makeSomeContext(), remainingCards);
-    Assertions.assertEquals(16384, newTalon.getCardClassDataByClass("COMMON").count());
+    Assertions.assertEquals(16384, newTalon.getCardClassByName("COMMON").count());
   }
 }

@@ -23,11 +23,11 @@ public class Talon {
     classes.forEach(CardClass::checkFinitudeConsistency);
   }
 
-  public PickNextCardResult pickNextCard(String classToPickFrom, long seed) {
-    CardClass cardClass = getCardClassDataByClass(classToPickFrom);
-    CardClass.PickNextCardResult pick = cardClass.pickNextCard(seed);
-    return PickNextCardResult.builder()
-        .card(pick.card)
+  public SelectionResult pickCardByClass(String classToPickFrom, long seed) {
+    final CardClass cardClass = getCardClassByName(classToPickFrom);
+    final CardClass.PickCardResult pick = cardClass.pickCard(seed);
+    return SelectionResult.builder()
+        .cards(List.of(pick.card))
         .remainingCards(
             toBuilder()
                 .classes(ListUtils.subst(classes, cardClass, pick.remainingCards))
@@ -35,15 +35,43 @@ public class Talon {
         .build();
   }
 
+  public SelectionResult pickCardBySerie(String classToPickFrom, String serieToPickFrom) {
+    final CardClass cardClass = getCardClassByName(classToPickFrom);
+    final CardSerie cardSerie = cardClass.getCardSerieByName(serieToPickFrom);
+    final CardSerie.PickCardResult pick = cardSerie.pickCard();
+    return SelectionResult.builder()
+            .cards(List.of(new Card(classToPickFrom, serieToPickFrom, pick.cardOrderNumber)))
+            .remainingCards(toBuilder()
+                    .classes(ListUtils.subst(classes, cardClass, cardClass.toBuilder()
+                                    .series(ListUtils.subst(cardClass.series, cardSerie, pick.remainingCards))
+                            .build()))
+                    .build())
+            .build();
+  }
+
+  public SelectionResult pickSpecificCard(String classToPickFrom, String serieToPickFrom, int orderNumber) {
+    final CardClass cardClass = getCardClassByName(classToPickFrom);
+    final CardSerie cardSerie = cardClass.getCardSerieByName(serieToPickFrom);
+    final CardSerie remainingCards = cardSerie.removeCard(orderNumber);
+    return SelectionResult.builder()
+            .cards(List.of(new Card(classToPickFrom, serieToPickFrom, orderNumber)))
+            .remainingCards(Talon.builder()
+                    .classes(ListUtils.subst(classes, cardClass, cardClass.toBuilder()
+                                    .series(ListUtils.subst(cardClass.series, cardSerie, remainingCards))
+                            .build()))
+                    .build())
+            .build();
+  }
+
   public Talon addCard(Card card) {
-    final CardClass cardClassToExtend = getCardClassDataByClass(card.originalClass);
+    final CardClass cardClassToExtend = getCardClassByName(card.originalClass);
     final CardClass extendedCardClass = cardClassToExtend.addCard(card);
     return toBuilder()
         .classes(ListUtils.subst(classes, cardClassToExtend, extendedCardClass))
         .build();
   }
 
-  public CardClass getCardClassDataByClass(String classToPickFrom) {
+  public CardClass getCardClassByName(String classToPickFrom) {
     return classes.stream()
         .filter(cls -> cls.cardClass.equals(classToPickFrom))
         .findFirst()

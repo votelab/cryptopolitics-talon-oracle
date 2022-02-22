@@ -42,7 +42,7 @@ public class ExtendTalonTransformation implements Transformation {
             cardClassData -> {
               CardClass extra;
               try {
-                extra = additionalCards.getCardClassDataByClass(cardClassData.cardClass);
+                extra = additionalCards.getCardClassByName(cardClassData.cardClass);
               } catch (NoSuchCardClass e) {
                 return cardClassData;
               }
@@ -67,7 +67,7 @@ public class ExtendTalonTransformation implements Transformation {
             cardSerieData -> {
               CardSerie extraSerie;
               try {
-                extraSerie = extraCardClass.getSerieByName(cardSerieData.name);
+                extraSerie = extraCardClass.getCardSerieByName(cardSerieData.name);
               } catch (NoSuchCardSerie e) {
                 return cardSerieData;
               }
@@ -89,7 +89,7 @@ public class ExtendTalonTransformation implements Transformation {
         .flatMap(
             extraCardSerieData -> {
               try {
-                cardClass.getSerieByName(extraCardSerieData.name);
+                cardClass.getCardSerieByName(extraCardSerieData.name);
               } catch (NoSuchCardSerie e) {
                 return Stream.of(extraCardSerieData);
               }
@@ -102,7 +102,7 @@ public class ExtendTalonTransformation implements Transformation {
         .flatMap(
             extraCardClassData -> {
               try {
-                in.getCardClassDataByClass(extraCardClassData.cardClass);
+                in.getCardClassByName(extraCardClassData.cardClass);
               } catch (NoSuchCardClass e) {
                 return Stream.of(extraCardClassData);
               }

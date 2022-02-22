@@ -43,45 +43,38 @@ public class CardClass {
 
     @Data
     @Builder
-    public static class PickNextCardResult {
+    public static class PickCardResult {
         public final Card card;
         public final CardClass remainingCards;
     }
 
-    public PickNextCardResult pickNextCard(long seed) {
-        int serieIndex;
-        if (isInfinite)
-            serieIndex = (int) ((seed & LONG_MASK) % series.size());
-        else {
-            int total = 0;
-            int[] rollingSumOfCount = new int[series.size()];
-            for (int i = 0; i < series.size(); i++) {
-                total += series.get(i).count();
-                rollingSumOfCount[i] = total;
-            }
-            if (total == 0)
+    public PickCardResult pickCard(long seed) {
+        final CardSerie serie;
+        if (isInfinite) {
+            if (series.isEmpty())
                 throw new CardClassEmpty(cardClass);
-            int randomCardIndex = (int) ((seed & LONG_MASK) % total);
-            serieIndex = 0;
-            while (randomCardIndex >= rollingSumOfCount[serieIndex]) {
-                serieIndex++;
+            serie = series.get((int) ((seed & LONG_MASK) % series.size()));
+        } else {
+            try {
+                serie = Weighted.select(series.stream().map(s -> new Weighted<>(s, s.count())).toList(), seed);
+            } catch (IllegalArgumentException e) {
+                throw new CardClassEmpty(cardClass);
             }
         }
-        final CardSerie serie = series.get(serieIndex);
-        final CardSerie.PickNextCardResult pick = serie.pickNextCard();
-        return PickNextCardResult.builder()
+        final CardSerie.PickCardResult pick = serie.pickCard();
+        return CardClass.PickCardResult.builder()
                 .card(new Card(cardClass, serie.name, pick.cardOrderNumber))
                 .remainingCards(toBuilder().series(ListUtils.subst(series, serie, pick.remainingCards)).build())
                 .build();
     }
 
     public CardClass addCard(Card card) throws NoSuchCardSerie {
-        final CardSerie serieToExtend = getSerieByName(card.serieName);
+        final CardSerie serieToExtend = getCardSerieByName(card.serieName);
         final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
         return toBuilder().series(ListUtils.subst(series, serieToExtend, extendedSerie)).build();
     }
 
-    public CardSerie getSerieByName(final String name) throws NoSuchCardSerie {
+    public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
         return series.stream().filter(serie -> name.equals(serie.name)).findFirst().orElseThrow(() -> new NoSuchCardSerie(name));
     }
 
