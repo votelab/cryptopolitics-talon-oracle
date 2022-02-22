@@ -16,6 +16,10 @@ import java.util.Random;
 public record Together(
         @Valid @NotNull List<Selection> selections) implements Selection {
 
+    public Together(Selection... selections) {
+        this(List.of(selections));
+    }
+
     @Override
     public SelectionResult pickCards(Talon talon, Random random) {
         final List<Card> cards = new ArrayList<>();

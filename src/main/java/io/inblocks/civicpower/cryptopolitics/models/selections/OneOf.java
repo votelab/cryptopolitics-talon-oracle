@@ -16,6 +16,11 @@ import java.util.Random;
 public record OneOf(
         @Valid @NotNull @NotEmpty List<Weighted<Selection>> weightedSelections) implements Selection {
 
+    @SafeVarargs
+    public OneOf(Weighted<Selection>... weightedSelection) {
+        this(List.of(weightedSelection));
+    }
+
     @Override
     public SelectionResult pickCards(Talon talon, Random random) {
         Selection selection = Weighted.select(weightedSelections, random.nextLong());
