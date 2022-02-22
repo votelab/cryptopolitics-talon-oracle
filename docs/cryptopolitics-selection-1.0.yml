@@ -139,8 +139,6 @@ components:
       - size
       type: object
       properties:
-        infinite:
-          type: boolean
         name:
           type: string
         size:
@@ -172,6 +170,30 @@ components:
       properties:
         additionalCards:
           $ref: '#/components/schemas/Talon'
+    FromClass:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - cardClass
+        type: object
+        properties:
+          cardClass:
+            minLength: 1
+            type: string
+    FromSerie:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - cardClass
+        - cardSerie
+        type: object
+        properties:
+          cardClass:
+            minLength: 1
+            type: string
+          cardSerie:
+            minLength: 1
+            type: string
     InitTransformation:
       required:
       - seedGenerator
@@ -184,6 +206,18 @@ components:
           $ref: '#/components/schemas/SeedGeneratorParams'
     Object:
       type: object
+    OneOf:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - weightedSelections
+        type: object
+        properties:
+          weightedSelections:
+            minItems: 1
+            type: array
+            items:
+              $ref: '#/components/schemas/Weighted_Selection_'
     OpenChestTransformation:
       required:
       - chestType
@@ -221,19 +255,19 @@ components:
             $ref: '#/components/schemas/Object'
     PickCardsTransformation:
       required:
-      - cardClasses
+      - selection
       type: object
       properties:
         results:
           $ref: '#/components/schemas/Object'
-        cardClasses:
-          type: array
-          items:
-            type: string
+        selection:
+          $ref: '#/components/schemas/Selection'
         pickedCards:
           type: array
           items:
             $ref: '#/components/schemas/Card'
+    Record:
+      type: object
     SeedGeneratorParams:
       required:
       - index
@@ -249,6 +283,15 @@ components:
         seedUsed:
           type: string
           nullable: true
+    Selection:
+      type: object
+      anyOf:
+      - $ref: '#/components/schemas/FromClass'
+      - $ref: '#/components/schemas/FromSerie'
+      - $ref: '#/components/schemas/OneOf'
+      - $ref: '#/components/schemas/TheCard'
+      - $ref: '#/components/schemas/Times'
+      - $ref: '#/components/schemas/Together'
     Talon:
       required:
       - classes
@@ -275,6 +318,49 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Transformation'
+    TheCard:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - cardClass
+        - cardSerie
+        - orderNumber
+        type: object
+        properties:
+          cardClass:
+            minLength: 1
+            type: string
+          cardSerie:
+            minLength: 1
+            type: string
+          orderNumber:
+            type: integer
+            format: int32
+    Times:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - selection
+        - times
+        type: object
+        properties:
+          times:
+            minimum: 0
+            type: integer
+            format: int32
+          selection:
+            $ref: '#/components/schemas/Selection'
+    Together:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - selections
+        type: object
+        properties:
+          selections:
+            type: array
+            items:
+              $ref: '#/components/schemas/Selection'
     Transformation:
       type: object
       anyOf:
@@ -283,3 +369,17 @@ components:
       - $ref: '#/components/schemas/AddCardsTransformation'
       - $ref: '#/components/schemas/OpenChestTransformation'
       - $ref: '#/components/schemas/ExtendTalonTransformation'
+    Weighted_Selection_:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - thing
+        - weight
+        type: object
+        properties:
+          thing:
+            $ref: '#/components/schemas/Selection'
+          weight:
+            minimum: 0
+            type: integer
+            format: int32
