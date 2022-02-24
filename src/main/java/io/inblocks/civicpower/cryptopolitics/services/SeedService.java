@@ -1,5 +1,6 @@
 package io.inblocks.civicpower.cryptopolitics.services;
 
+import io.inblocks.civicpower.cryptopolitics.exceptions.UnknownSeedGenerator;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.discovery.event.ServiceReadyEvent;
@@ -92,7 +93,7 @@ public class SeedService implements ApplicationEventListener<ServiceReadyEvent> 
         namedSeeds.stream()
             .filter(ns -> ns.name.equals(name))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(name));
+            .orElseThrow(() -> new UnknownSeedGenerator(name));
     final byte[] seed = DigestUtils.sha256(namedSeed.value);
     long before = System.nanoTime();
     final SeedGenerator seedGenerator = new SeedGenerator(seed, namedSeed.size, DEFAULT_SAMPLING);

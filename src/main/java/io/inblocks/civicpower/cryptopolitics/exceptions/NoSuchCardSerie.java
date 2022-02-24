@@ -6,7 +6,7 @@ public class NoSuchCardSerie extends CryptopoliticsTalonException {
   public final String name;
 
   public NoSuchCardSerie(String name) {
-    super(HttpStatus.BAD_REQUEST, name);
+    super(HttpStatus.BAD_REQUEST, "No such card serie: " + name);
     this.name = name;
   }
 }
