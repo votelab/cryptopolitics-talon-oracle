@@ -27,7 +27,7 @@ public class OpenChestTransformation implements Transformation {
     private static Selection epicCardClass(Locale locale) { return new FromClass("EPIC_" + locale); }
     private static Selection legendaryCardClass(Locale locale) { return new FromClass("LEGENDARY_" + locale); }
 
-    private static Selection freeChestContent(Locale locale) { return new Times(3, freeCardClass(locale)); }
+    private static Selection freeChestContent(Locale locale) { return new Times(4, freeCardClass(locale)); }
     private static Selection commonChestContent(Locale locale) { return new Together(
             new Times(2, commonCardClass(locale)),
             new OneOf(new Weighted<>(commonCardClass(locale), 2), new Weighted<>(rareCardClass(locale), 1))); }
