@@ -3,7 +3,7 @@ package io.inblocks.civicpower.cryptopolitics.models.transformations;
 import io.inblocks.civicpower.cryptopolitics.exceptions.TalonAlreadyInitialized;
 import io.inblocks.civicpower.cryptopolitics.models.Context;
 import io.inblocks.civicpower.cryptopolitics.models.SeedGeneratorParams;
-import io.inblocks.civicpower.cryptopolitics.models.Talon;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.Transformation;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;

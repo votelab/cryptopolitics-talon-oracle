@@ -4,6 +4,9 @@ import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatc
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
 import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.cards.CardClass;
+import io.inblocks.civicpower.cryptopolitics.models.cards.CardSerie;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Data;
 

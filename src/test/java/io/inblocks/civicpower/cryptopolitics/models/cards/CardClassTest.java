@@ -1,4 +1,4 @@
-package io.inblocks.civicpower.cryptopolitics.models;
+package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;

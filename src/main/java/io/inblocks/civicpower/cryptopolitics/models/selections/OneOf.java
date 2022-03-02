@@ -2,7 +2,7 @@ package io.inblocks.civicpower.cryptopolitics.models.selections;
 
 import io.inblocks.civicpower.cryptopolitics.models.Selection;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
-import io.inblocks.civicpower.cryptopolitics.models.Talon;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.Weighted;
 import io.micronaut.core.annotation.Introspected;
 

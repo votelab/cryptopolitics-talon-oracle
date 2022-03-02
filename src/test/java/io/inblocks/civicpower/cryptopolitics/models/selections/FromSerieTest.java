@@ -4,7 +4,7 @@ import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
 import io.inblocks.civicpower.cryptopolitics.models.Selection;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
-import io.inblocks.civicpower.cryptopolitics.models.Talon;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

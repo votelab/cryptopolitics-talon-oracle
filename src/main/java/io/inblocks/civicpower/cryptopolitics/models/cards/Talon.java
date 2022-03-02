@@ -1,7 +1,8 @@
-package io.inblocks.civicpower.cryptopolitics.models;
+package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
+import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
 import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

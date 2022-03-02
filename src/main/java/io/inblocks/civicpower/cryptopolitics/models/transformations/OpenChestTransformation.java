@@ -1,6 +1,7 @@
 package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
 import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.selections.FromClass;
 import io.inblocks.civicpower.cryptopolitics.models.selections.OneOf;
 import io.inblocks.civicpower.cryptopolitics.models.selections.Times;

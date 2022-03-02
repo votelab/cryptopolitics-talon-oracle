@@ -1,8 +1,8 @@
 package io.inblocks.civicpower.cryptopolitics.models.selections;
 
-import io.inblocks.civicpower.cryptopolitics.models.CardClass;
-import io.inblocks.civicpower.cryptopolitics.models.CardSerie;
-import io.inblocks.civicpower.cryptopolitics.models.Talon;
+import io.inblocks.civicpower.cryptopolitics.models.cards.CardClass;
+import io.inblocks.civicpower.cryptopolitics.models.cards.CardSerie;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 
 import java.util.List;
 

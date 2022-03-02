@@ -3,6 +3,7 @@ package io.inblocks.civicpower.cryptopolitics.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.contexts.ForcedSeedContext;
 import io.inblocks.civicpower.cryptopolitics.models.contexts.SeedGeneratorContext;
 import io.inblocks.civicpower.cryptopolitics.services.SeedService;

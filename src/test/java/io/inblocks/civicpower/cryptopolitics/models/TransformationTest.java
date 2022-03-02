@@ -2,6 +2,8 @@ package io.inblocks.civicpower.cryptopolitics.models;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Card;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.contexts.SeedGeneratorContext;
 import io.inblocks.civicpower.cryptopolitics.models.selections.FromClass;
 import io.inblocks.civicpower.cryptopolitics.models.transformations.AddCardsTransformation;

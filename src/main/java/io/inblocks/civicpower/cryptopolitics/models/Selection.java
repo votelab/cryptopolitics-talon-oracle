@@ -2,6 +2,7 @@ package io.inblocks.civicpower.cryptopolitics.models;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.inblocks.civicpower.cryptopolitics.models.selections.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 

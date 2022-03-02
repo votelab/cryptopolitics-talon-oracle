@@ -1,7 +1,8 @@
-package io.inblocks.civicpower.cryptopolitics.models;
+package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
+import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

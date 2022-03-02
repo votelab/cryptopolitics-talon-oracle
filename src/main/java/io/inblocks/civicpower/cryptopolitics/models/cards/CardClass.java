@@ -1,4 +1,4 @@
-package io.inblocks.civicpower.cryptopolitics.models;
+package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,6 +6,7 @@ import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
+import io.inblocks.civicpower.cryptopolitics.models.Weighted;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Builder;
 import lombok.Data;
@@ -78,7 +79,7 @@ public class CardClass {
         return series.stream().filter(serie -> name.equals(serie.name)).findFirst().orElseThrow(() -> new NoSuchCardSerie(name));
     }
 
-    protected Integer count() {
+    public Integer count() {
         if (isInfinite)
             return null;
         else {

@@ -1,4 +1,4 @@
-package io.inblocks.civicpower.cryptopolitics.models;
+package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardAlreadyPresent;

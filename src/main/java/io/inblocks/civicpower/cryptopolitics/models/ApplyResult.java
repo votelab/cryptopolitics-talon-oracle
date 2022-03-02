@@ -1,5 +1,6 @@
 package io.inblocks.civicpower.cryptopolitics.models;
 
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

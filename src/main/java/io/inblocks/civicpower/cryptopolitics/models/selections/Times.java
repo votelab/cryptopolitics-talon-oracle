@@ -1,9 +1,9 @@
 package io.inblocks.civicpower.cryptopolitics.models.selections;
 
-import io.inblocks.civicpower.cryptopolitics.models.Card;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Card;
 import io.inblocks.civicpower.cryptopolitics.models.Selection;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
-import io.inblocks.civicpower.cryptopolitics.models.Talon;
+import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
 import io.micronaut.core.annotation.Introspected;
 
 import javax.validation.Valid;
