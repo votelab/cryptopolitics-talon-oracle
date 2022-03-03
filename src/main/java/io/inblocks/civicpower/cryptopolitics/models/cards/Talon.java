@@ -56,7 +56,7 @@ public class Talon {
     final CardSerie remainingCards = cardSerie.removeCard(orderNumber);
     return SelectionResult.builder()
             .cards(List.of(new Card(classToPickFrom, serieToPickFrom, orderNumber)))
-            .remainingCards(Talon.builder()
+            .remainingCards(toBuilder()
                     .classes(ListUtils.subst(classes, cardClass, cardClass.toBuilder()
                                     .series(ListUtils.subst(cardClass.series, cardSerie, remainingCards))
                             .build()))

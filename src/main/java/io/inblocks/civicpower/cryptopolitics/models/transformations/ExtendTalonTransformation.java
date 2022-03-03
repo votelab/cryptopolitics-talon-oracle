@@ -3,7 +3,8 @@ package io.inblocks.civicpower.cryptopolitics.models.transformations;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
-import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.Context;
+import io.inblocks.civicpower.cryptopolitics.models.Transformation;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardClass;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardSerie;
 import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
@@ -32,7 +33,7 @@ public class ExtendTalonTransformation implements Transformation {
   }
 
   private Talon mergeTalon(Talon in, Talon additionalCards) {
-      return Talon.builder()
+      return in.toBuilder()
         .classes(
             Stream.concat(mergeClasses(in, additionalCards), addNewClasses(in, additionalCards))
                 .toList())
