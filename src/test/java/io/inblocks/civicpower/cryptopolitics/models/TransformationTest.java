@@ -26,7 +26,7 @@ class TransformationTest {
   @Inject
   SeedService seedService;
 
-  final String serializedTalon = "{\"classes\":[{\"cardClass\":\"COMMON\",\"series\":[{\"name\":\"pique\",\"size\":4096},{\"name\":\"coeur\",\"size\":4096},{\"name\":\"carreau\",\"size\":4096},{\"name\":\"trefle\",\"size\":4096}]},{\"cardClass\":\"JOKERS\",\"series\":[{\"name\":\"jokers\",\"size\":2}]}],\"seedGenerator\":{\"name\":\"tests\",\"index\":10000}}";
+  final String serializedTalon = "{\"classes\":[{\"cardClass\":\"COMMON\",\"infinite\":false,\"series\":[{\"name\":\"pique\",\"size\":4096},{\"name\":\"coeur\",\"size\":4096},{\"name\":\"carreau\",\"size\":4096},{\"name\":\"trefle\",\"size\":4096}]},{\"cardClass\":\"JOKERS\",\"infinite\":false,\"series\":[{\"name\":\"jokers\",\"size\":2}]}],\"seedGenerator\":{\"name\":\"tests\",\"index\":10000}}";
 
   protected Context makeSomeContext() {
     return new SeedGeneratorContext(seedService, SeedGeneratorParams.builder().name("tests").index(10000L).build());
