@@ -2,7 +2,9 @@ package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.TalonAlreadyInitialized;
-import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.Context;
+import io.inblocks.civicpower.cryptopolitics.models.SeedGeneratorParams;
+import io.inblocks.civicpower.cryptopolitics.models.TransformationTest;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardClass;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardSerie;
 import io.inblocks.civicpower.cryptopolitics.models.cards.Talon;
@@ -24,6 +26,7 @@ class InitTransformationTest extends TransformationTest {
                     List.of(
                             CardClass.builder()
                                     .cardClass("COMMON")
+                                    .isInfinite(false)
                                     .series(List.of(new CardSerie("cards", 52)))
                                     .build()))
             .build();
@@ -33,6 +36,7 @@ class InitTransformationTest extends TransformationTest {
                 Arrays.asList(
                     CardClass.builder()
                         .cardClass("COMMON")
+                        .isInfinite(false)
                         .series(
                             Arrays.asList(
                                 new CardSerie("pique", 13),
@@ -58,6 +62,7 @@ class InitTransformationTest extends TransformationTest {
                 List.of(
                     CardClass.builder()
                         .cardClass("COMMON")
+                        .isInfinite(false)
                         .series(
                             Arrays.asList(
                                 new CardSerie("pique", 13),
@@ -83,6 +88,7 @@ class InitTransformationTest extends TransformationTest {
     Talon setup = Talon.builder()
             .classes(List.of(CardClass.builder()
                             .cardClass("COMMON")
+                            .isInfinite(false)
                             .series(List.of(new CardSerie("pique", null)))
                     .build()))
             .build();

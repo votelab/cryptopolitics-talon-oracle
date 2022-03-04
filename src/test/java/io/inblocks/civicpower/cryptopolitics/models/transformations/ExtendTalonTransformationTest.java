@@ -1,7 +1,8 @@
 package io.inblocks.civicpower.cryptopolitics.models.transformations;
 
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
-import io.inblocks.civicpower.cryptopolitics.models.*;
+import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
+import io.inblocks.civicpower.cryptopolitics.models.TransformationTest;
 import io.inblocks.civicpower.cryptopolitics.models.cards.Card;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardClass;
 import io.inblocks.civicpower.cryptopolitics.models.cards.CardSerie;
@@ -22,6 +23,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     final CardClass newClass =
         CardClass.builder()
             .cardClass("NEW")
+            .isInfinite(false)
             .series(Collections.singletonList(new CardSerie("clean", 4)))
             .build();
     ExtendTalonTransformation transformation =
@@ -42,6 +44,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     final CardClass newClass =
         CardClass.builder()
             .cardClass("COMMON")
+            .isInfinite(false)
             .series(Collections.singletonList(newSerie))
             .build();
     ExtendTalonTransformation transformation =
@@ -67,6 +70,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     final CardClass classExtension =
         CardClass.builder()
             .cardClass("COMMON")
+            .isInfinite(false)
             .series(Collections.singletonList(new CardSerie("second", 4)))
             .build();
     ExtendTalonTransformation transformation =
@@ -94,6 +98,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
                 Collections.singletonList(
                     CardClass.builder()
                         .cardClass("COMMON")
+                        .isInfinite(false)
                         .series(
                             Collections.singletonList(
                                 new CardSerie("first", 2).pickCard().remainingCards))
@@ -102,6 +107,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     final CardClass classExtension =
         CardClass.builder()
             .cardClass("COMMON")
+            .isInfinite(false)
             .series(Collections.singletonList(new CardSerie("first", 3)))
             .build();
     ExtendTalonTransformation transformation =
@@ -131,6 +137,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
                             Collections.singletonList(
                                     CardClass.builder()
                                             .cardClass("COMMON")
+                                            .isInfinite(false)
                                             .series(
                                                     Collections.singletonList(oldSerie))
                                             .build()))
@@ -138,6 +145,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     final CardClass classExtension =
             CardClass.builder()
                     .cardClass("COMMON")
+                    .isInfinite(false)
                     .series(Collections.singletonList(new CardSerie("first", 2)))
                     .build();
     ExtendTalonTransformation transformation =
@@ -163,6 +171,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     Talon setup = Talon.builder()
             .classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
+                    .isInfinite(false)
                     .series(List.of(new CardSerie("pique", null)))
                     .build()))
             .build();
@@ -185,6 +194,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
   void extentTalonPreservesFinitude() {
     Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
+                        .isInfinite(false)
                     .series(List.of(new CardSerie("INITIAL_FINITE", 3))).build(),
             CardClass.builder()
                     .cardClass("FREE")
@@ -194,6 +204,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     Talon extraTalon = Talon.builder()
             .classes(List.of(CardClass.builder()
                             .cardClass("COMMON")
+                            .isInfinite(false)
                             .series(List.of(new CardSerie("NEW_FINITE", 4)))
                     .build(), CardClass.builder()
                             .cardClass("FREE")
@@ -218,6 +229,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
   void canExtendFiniteClassWithInfiniteClass() {
     Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
+                    .isInfinite(false)
                     .series(List.of(new CardSerie("INITIAL_FINITE", 3))).build())).build();
     Talon extraTalon = Talon.builder()
             .classes(List.of(CardClass.builder()
@@ -240,6 +252,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     Talon extraTalon = Talon.builder()
             .classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
+                    .isInfinite(false)
                     .series(List.of(new CardSerie("NEW_FINITE", 3)))
                     .build()))
             .build();
@@ -254,6 +267,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
             Collections.singletonList(
                 CardClass.builder()
                     .cardClass("COMMON")
+                    .isInfinite(false)
                     .series(
                         List.of(
                             new CardSerie("first", 2), new CardSerie("second", 3)))

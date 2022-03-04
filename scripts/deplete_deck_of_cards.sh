@@ -4,7 +4,7 @@
 URL='http://localhost:40006/talon/applyTransformations'
 
 SEEDINDEX=$((1000000 - $RANDOM))
-SETUP='{"classes":[{"cardClass":"COMMON","series":[{"name":"pique","size":13},{"name":"coeur","size":13},{"name":"carreau","size":13},{"name":"trefle","size":13}]}]}'
+SETUP='{"classes":[{"cardClass":"COMMON","infinite":false,"series":[{"name":"pique","size":13},{"name":"coeur","size":13},{"name":"carreau","size":13},{"name":"trefle","size":13}]}]}'
 SG='{"name":"cryptopolitics-dev","index":'"$SEEDINDEX"'}'
 RESULT="$(curl -sS "$URL" -H 'Content-Type: application/json' -d '{"talon": null, "transformations":[{"type":"Init","setup":'"$SETUP"',"seedGenerator":'"$SG"'}]}')"
 TALON="$(jq -c '.talon' <<<"$RESULT")"

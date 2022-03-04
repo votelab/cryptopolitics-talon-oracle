@@ -1,6 +1,5 @@
 package io.inblocks.civicpower.cryptopolitics.models.cards;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
@@ -22,15 +21,14 @@ import java.util.Objects;
 public class CardClass {
     @NotNull
     public final String cardClass;
-    @JsonProperty(value="infinite")
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    protected final boolean isInfinite;
+    @Valid @NotNull @JsonProperty(value="infinite")
+    public final Boolean isInfinite;
     @Valid @NotNull
     public final List<CardSerie> series;
 
     static final long LONG_MASK = 0xffffffffL;
 
-    public CardClass(final String cardClass, final boolean isInfinite, final List<CardSerie> series) {
+    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series) {
         this.cardClass = cardClass;
         this.isInfinite = isInfinite;
         this.series = series;

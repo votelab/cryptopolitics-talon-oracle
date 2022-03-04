@@ -61,7 +61,7 @@ public class ExtendTalonTransformation implements Transformation {
   }
 
     private void checkClassesCompatibility(CardClass cardClassData, CardClass extra) {
-        if (cardClassData.isInfinite() != extra.isInfinite())
+        if (cardClassData.isInfinite != extra.isInfinite)
             throw new CardClassFinitudeMismatch(extra.cardClass);
     }
 

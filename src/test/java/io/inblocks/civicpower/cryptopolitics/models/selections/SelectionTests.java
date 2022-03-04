@@ -10,9 +10,11 @@ public abstract class SelectionTests {
     protected Talon get52CardsTalon() {
         return Talon.builder().classes(List.of(CardClass.builder()
                 .cardClass("Black")
+                .isInfinite(false)
                 .series(List.of(new CardSerie("piques", 13), new CardSerie("spades", 13)))
                 .build(), CardClass.builder()
                 .cardClass("Red")
+                .isInfinite(false)
                 .series(List.of(new CardSerie("hearts", 13), new CardSerie("tiles", 13))).build())).build();
     }
 }

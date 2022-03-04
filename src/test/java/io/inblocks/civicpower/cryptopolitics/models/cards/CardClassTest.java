@@ -19,14 +19,14 @@ class CardClassTest {
 
     @Test
     void cantDealFromNoSeries() {
-        final CardClass cardClass = CardClass.builder().cardClass(COMMON_CLASS).series(Collections.emptyList()).build();
+        final CardClass cardClass = CardClass.builder().cardClass(COMMON_CLASS).isInfinite(false).series(Collections.emptyList()).build();
         long seed = r.nextLong();
         Assertions.assertThrows(CardClassEmpty.class, () -> cardClass.pickCard(seed));
     }
 
     @Test
     void dealFromSingleSerie() {
-        final CardClass cardClassOfOneSerie = CardClass.builder().cardClass(COMMON_CLASS).series(Collections.singletonList(
+        final CardClass cardClassOfOneSerie = CardClass.builder().cardClass(COMMON_CLASS).isInfinite(false).series(Collections.singletonList(
                 new CardSerie("test", 2))).build();
         final CardClass.PickCardResult result1 = cardClassOfOneSerie.pickCard(r.nextLong());
         Assertions.assertEquals(new Card(COMMON_CLASS, "test", 1), result1.card);
@@ -39,6 +39,7 @@ class CardClassTest {
     final CardClass cardClassOfTwoSeries =
         CardClass.builder()
             .cardClass(COMMON_CLASS)
+            .isInfinite(false)
             .series(Arrays.asList(new CardSerie("orange", 1), new CardSerie("blue", 1)))
             .build();
         final CardClass.PickCardResult result1 = cardClassOfTwoSeries.pickCard(r.nextLong());
@@ -53,6 +54,7 @@ class CardClassTest {
     void addCard() {
         CardClass cardClass = CardClass.builder()
                 .cardClass(COMMON_CLASS)
+                .isInfinite(false)
                 .series(Arrays.asList(new CardSerie("blue", 2).removeCard(1), new CardSerie("orange", 3)))
                 .build();
         CardClass restoredCardClass = cardClass.addCard(new Card(COMMON_CLASS, "blue", 1));

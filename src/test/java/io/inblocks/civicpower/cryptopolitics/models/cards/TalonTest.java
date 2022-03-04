@@ -27,6 +27,7 @@ class TalonTest {
                 Collections.singletonList(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
+                        .isInfinite(false)
                         .series(
                             Collections.singletonList(
                                 new CardSerie("test", 1).pickCard().remainingCards))
@@ -45,6 +46,7 @@ class TalonTest {
                 Collections.singletonList(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
+                        .isInfinite(false)
                         .series(Collections.singletonList(new CardSerie("test", 1)))
                         .build()))
             .build();
@@ -60,6 +62,7 @@ class TalonTest {
                 Collections.singletonList(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
+                        .isInfinite(false)
                         .series(
                             Collections.singletonList(
                                 new CardSerie("test", 1).pickCard().remainingCards))
@@ -80,6 +83,7 @@ class TalonTest {
                 Collections.singletonList(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
+                        .isInfinite(false)
                         .series(Collections.singletonList(new CardSerie("test", 1)))
                         .build()))
             .build();
