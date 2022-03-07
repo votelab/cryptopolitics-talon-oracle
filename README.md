@@ -2,7 +2,7 @@
 Cryptopolitics Selection
 ------------------------
 
-![Software under MIT License](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is version 1.0 of the Cryptopolitics Selection microservice. 
 It's made public so that anybody can replay Cryptopolitics talon transitions.
