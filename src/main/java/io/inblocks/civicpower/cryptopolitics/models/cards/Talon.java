@@ -83,7 +83,10 @@ public class Talon {
   public Talon deprecateSeries(final Map<String, List<String>> seriesToDeprecate) {
     return toBuilder()
             .classes(classes.stream()
-                    .map(cardClass -> seriesToDeprecate.containsKey(cardClass.cardClass) ? cardClass.deprecateSeriesByName(seriesToDeprecate.get(cardClass.cardClass)) : cardClass)
+                    .map(cardClass -> {
+                      final List<String> seriesToDeprecateFromClass = seriesToDeprecate.get(cardClass.cardClass);
+                      return seriesToDeprecateFromClass != null ? cardClass.deprecateSeriesByName(seriesToDeprecateFromClass) : cardClass;
+                    })
                     .toList())
             .build();
   }
