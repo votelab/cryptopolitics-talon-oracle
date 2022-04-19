@@ -11,6 +11,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Data
@@ -77,6 +78,14 @@ public class Talon {
         .filter(cls -> cls.cardClass.equals(classToPickFrom))
         .findFirst()
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
+  }
+
+  public Talon deprecateSeries(final Map<String, List<String>> seriesToDeprecate) {
+    return toBuilder()
+            .classes(classes.stream()
+                    .map(cardClass -> seriesToDeprecate.containsKey(cardClass.cardClass) ? cardClass.deprecateSeriesByName(seriesToDeprecate.get(cardClass.cardClass)) : cardClass)
+                    .toList())
+            .build();
   }
 
   @Override

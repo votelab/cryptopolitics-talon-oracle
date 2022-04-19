@@ -7,8 +7,8 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @MicronautTest
@@ -24,12 +24,12 @@ class TalonTest {
     Talon talon =
         Talon.builder()
             .classes(
-                Collections.singletonList(
+                List.of(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
                         .series(
-                            Collections.singletonList(
+                            List.of(
                                 new CardSerie("test", 1).pickCard().remainingCards))
                         .build()))
             .build();
@@ -43,11 +43,11 @@ class TalonTest {
     Talon talon =
         Talon.builder()
             .classes(
-                Collections.singletonList(
+                List.of(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
-                        .series(Collections.singletonList(new CardSerie("test", 1)))
+                        .series(List.of(new CardSerie("test", 1)))
                         .build()))
             .build();
     SelectionResult pick = talon.pickCardByClass(COMMON_CLASS, r.nextLong());
@@ -59,12 +59,12 @@ class TalonTest {
     Talon talon =
         Talon.builder()
             .classes(
-                Collections.singletonList(
+                List.of(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
                         .series(
-                            Collections.singletonList(
+                            List.of(
                                 new CardSerie("test", 1).pickCard().remainingCards))
                         .build()))
             .build();
@@ -80,15 +80,44 @@ class TalonTest {
     Talon talon =
         Talon.builder()
             .classes(
-                Collections.singletonList(
+                List.of(
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
-                        .series(Collections.singletonList(new CardSerie("test", 1)))
+                        .series(List.of(new CardSerie("test", 1)))
                         .build()))
             .build();
     long seed = r.nextLong();
     Assertions.assertThrows(
         NoSuchCardClass.class, () -> talon.pickCardByClass(EPIC_CLASS, seed));
+  }
+
+  @Test
+  void deprecateSeries() {
+    final CardSerie serieOne = new CardSerie("one", 1);
+    final CardSerie serieTwo = new CardSerie("two", 1);
+    final CardSerie serieThree = new CardSerie("three", 1);
+    final CardSerie serieFour = new CardSerie("four", 1);
+    final Talon talon = Talon.builder()
+            .classes(List.of(
+                    CardClass.builder()
+                            .cardClass(COMMON_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieOne, serieTwo))
+                            .build(),
+                    CardClass.builder()
+                            .cardClass(EPIC_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieThree, serieFour))
+                            .build()
+            ))
+            .build();
+    final Talon newTalon = talon.deprecateSeries(Map.of(COMMON_CLASS, List.of("two"), EPIC_CLASS, List.of("three")));
+    final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
+    Assertions.assertEquals(List.of(serieOne), newCommonClass.series);
+    Assertions.assertEquals(List.of(serieTwo), newCommonClass.deprecatedSeries);
+    final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
+    Assertions.assertEquals(List.of(serieFour), newEpicClass.series);
+    Assertions.assertEquals(List.of(serieThree), newEpicClass.deprecatedSeries);
   }
 }
