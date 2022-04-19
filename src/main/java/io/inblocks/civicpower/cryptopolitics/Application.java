@@ -20,7 +20,7 @@ import java.util.Base64;
 @OpenAPIDefinition(
     info = @Info(
             title = "Cryptopolitics Selection",
-            version = "1.0",
+            version = "1.1",
             description = "Cryptopolitics talon transformations engine",
             license = @License(name = "MIT", url = "https://opensource.org/licenses/MIT"),
             contact =

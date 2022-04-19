@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: "1.0"
+  version: "1.1"
 paths:
   /talon/applyTransformations:
     post:
@@ -121,6 +121,8 @@ components:
     CardClass:
       required:
       - cardClass
+      - deprecatedSeries
+      - infinite
       - series
       type: object
       properties:
@@ -129,6 +131,10 @@ components:
         infinite:
           type: boolean
         series:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardSerie'
+        deprecatedSeries:
           type: array
           items:
             $ref: '#/components/schemas/CardSerie'
@@ -163,6 +169,17 @@ components:
       - EPIC
       - LEGENDARY
       - ETERNAL
+    DeprecateSeriesTransformation:
+      required:
+      - seriesToDeprecate
+      type: object
+      properties:
+        seriesToDeprecate:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     ExtendTalonTransformation:
       required:
       - additionalCards
@@ -369,6 +386,7 @@ components:
       - $ref: '#/components/schemas/AddCardsTransformation'
       - $ref: '#/components/schemas/OpenChestTransformation'
       - $ref: '#/components/schemas/ExtendTalonTransformation'
+      - $ref: '#/components/schemas/DeprecateSeriesTransformation'
     Weighted_Selection_:
       allOf:
       - $ref: '#/components/schemas/Record'

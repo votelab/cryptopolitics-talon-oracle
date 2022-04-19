@@ -4,7 +4,7 @@ Cryptopolitics Selection
 
 ![Software under MIT License](https://opensource.org/licenses/MIT)
 
-This is version 1.0 of the Cryptopolitics Selection microservice. 
+This is version 1.1 of the Cryptopolitics Selection microservice.
 It's made public so that anybody can replay Cryptopolitics talon transitions.
 
 It is written in Java 17 with Micronaut, using Gradle as build manager.
@@ -22,7 +22,7 @@ If you have Java 17 installed, you can compile it using
 Otherwise, you can use Docker to build this service in a container
 
 ```shell
-docker build -t "cryptopolitics-selection:1.0" .
+docker build -t "cryptopolitics-selection:1.1" .
 ```
 
 ### Execution
@@ -37,7 +37,7 @@ export MICRONAUT_ENVIRONMENTS=dev
 or using Docker
 
 ```shell
-docker run -e MICRONAUT_ENVIRONMENTS=dev "cryptopolitics-selection:1.0"
+docker run -e MICRONAUT_ENVIRONMENTS=dev "cryptopolitics-selection:1.1"
 ```
 
 ### Usage
