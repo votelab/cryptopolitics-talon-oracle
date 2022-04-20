@@ -1,6 +1,7 @@
 package io.inblocks.civicpower.cryptopolitics.models.cards;
 
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
+import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -129,5 +130,16 @@ class CardClassTest {
         final CardClass newCardClass = cardClass.deprecateSeriesByName(List.of("one", "three"));
         Assertions.assertEquals(List.of(serieTwo), newCardClass.series);
         Assertions.assertEquals(List.of(serieFour, serieOne, serieThree), newCardClass.deprecatedSeries);
+    }
+
+    @Test
+    void deprecateUnexistingSerie() {
+        final CardSerie serieOne = new CardSerie("one", 1);
+        final CardClass cardClass = CardClass.builder()
+                .cardClass(COMMON_CLASS)
+                .isInfinite(false)
+                .series(List.of(serieOne))
+                .build();
+        Assertions.assertThrows(NoSuchCardSerie.class, () -> cardClass.deprecateSeriesByName(List.of("two")));
     }
 }

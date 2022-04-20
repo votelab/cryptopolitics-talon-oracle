@@ -9,20 +9,20 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Introspected
 public class DeprecateSeriesTransformation implements Transformation {
-  @Valid @NotNull
-  public final Map<String, List<String>> seriesToDeprecate;
 
-  public DeprecateSeriesTransformation(final Map<String, List<String>> seriesToDeprecate) {
-    this.seriesToDeprecate = seriesToDeprecate;
+  @Valid @NotNull
+  public final List<Talon.ClassDeprecations> deprecatedCards;
+
+  public DeprecateSeriesTransformation(final List<Talon.ClassDeprecations> deprecatedCards) {
+    this.deprecatedCards = deprecatedCards;
   }
 
   @Override
   public Talon apply(final Context context, final Talon in) {
-    return in.deprecateSeries(seriesToDeprecate);
+    return in.deprecateSeries(deprecatedCards);
   }
 }

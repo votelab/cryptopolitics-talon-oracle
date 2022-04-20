@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 @MicronautTest
@@ -112,12 +111,29 @@ class TalonTest {
                             .build()
             ))
             .build();
-    final Talon newTalon = talon.deprecateSeries(Map.of(COMMON_CLASS, List.of("two"), EPIC_CLASS, List.of("three")));
+    final Talon newTalon = talon.deprecateSeries(List.of(
+            new Talon.ClassDeprecations(COMMON_CLASS, List.of("two")),
+            new Talon.ClassDeprecations(EPIC_CLASS, List.of("three"))));
     final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
     Assertions.assertEquals(List.of(serieOne), newCommonClass.series);
     Assertions.assertEquals(List.of(serieTwo), newCommonClass.deprecatedSeries);
     final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
     Assertions.assertEquals(List.of(serieFour), newEpicClass.series);
     Assertions.assertEquals(List.of(serieThree), newEpicClass.deprecatedSeries);
+  }
+
+  @Test
+  void deprecateSerieFromUnexistingClass() {
+    final CardSerie serieOne = new CardSerie("one", 1);
+    final Talon talon = Talon.builder()
+            .classes(List.of(
+                    CardClass.builder()
+                            .cardClass(COMMON_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieOne))
+                            .build()
+            ))
+            .build();
+    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.deprecateSeries(List.of(new Talon.ClassDeprecations("FREE", List.of("one")))));
   }
 }
