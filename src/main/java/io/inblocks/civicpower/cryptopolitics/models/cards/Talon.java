@@ -85,18 +85,18 @@ public class Talon {
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
   }
 
-  public record ClassDeprecations(String className, List<String> seriesToDeprecate) {}
+  public record ClassDeprecations(String cardClass, List<String> cardSeries) {}
 
   public Talon deprecateSeries(final List<ClassDeprecations> seriesToDeprecate) {
-    final Map<String, List<String>> seriesToDeprecateFromClasses = seriesToDeprecate.stream()
+    final Map<String, List<String>> seriesToDeprecateByClass = seriesToDeprecate.stream()
             .collect(Collectors.groupingBy(
                     // just for parameter validation
-                    classDeprecations -> getCardClassByName(classDeprecations.className).cardClass,
-                    flatMapping(classDeprecations -> classDeprecations.seriesToDeprecate.stream(), toList())));
+                    classDeprecations -> getCardClassByName(classDeprecations.cardClass).cardClass,
+                    flatMapping(classDeprecations -> classDeprecations.cardSeries.stream(), toList())));
     return toBuilder()
             .classes(classes.stream()
                     .map(cardClass ->
-                            Optional.ofNullable(seriesToDeprecateFromClasses.get(cardClass.cardClass))
+                            Optional.ofNullable(seriesToDeprecateByClass.get(cardClass.cardClass))
                               .map(seriesToDeprecateFromClass -> cardClass.deprecateSeriesByName(seriesToDeprecateFromClass))
                               .orElse(cardClass)
                     )
