@@ -20,8 +20,9 @@ import javax.validation.constraints.NotNull;
         @JsonSubTypes.Type(value = AddCardsTransformation.class, name = "AddCards"),
         @JsonSubTypes.Type(value = OpenChestTransformation.class, name = "OpenChest"),
         @JsonSubTypes.Type(value = ExtendTalonTransformation.class, name = "ExtendTalon"),
+        @JsonSubTypes.Type(value = DeprecateSeriesTransformation.class, name = "DeprecateSeries"),
 })
-@Schema(anyOf = {InitTransformation.class, PickCardsTransformation.class, AddCardsTransformation.class, OpenChestTransformation.class, ExtendTalonTransformation.class})
+@Schema(anyOf = {InitTransformation.class, PickCardsTransformation.class, AddCardsTransformation.class, OpenChestTransformation.class, ExtendTalonTransformation.class, DeprecateSeriesTransformation.class})
 public interface Transformation {
 
     Talon apply(@NotNull Context context, @Nullable final Talon in);

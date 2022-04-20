@@ -12,8 +12,8 @@ import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Introspected
@@ -25,13 +25,16 @@ public class CardClass {
     public final Boolean isInfinite;
     @Valid @NotNull
     public final List<CardSerie> series;
+    @Valid @NotNull
+    public final List<CardSerie> deprecatedSeries;
 
     static final long LONG_MASK = 0xffffffffL;
 
-    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series) {
+    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series, final List<CardSerie> deprecatedSeries) {
         this.cardClass = cardClass;
         this.isInfinite = isInfinite;
         this.series = series;
+        this.deprecatedSeries = Optional.ofNullable(deprecatedSeries).orElse(Collections.emptyList());
     }
 
     public void checkFinitudeConsistency() {
@@ -68,13 +71,57 @@ public class CardClass {
     }
 
     public CardClass addCard(Card card) throws NoSuchCardSerie {
-        final CardSerie serieToExtend = getCardSerieByName(card.serieName);
-        final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
-        return toBuilder().series(ListUtils.subst(series, serieToExtend, extendedSerie)).build();
+      return getOptionalCardSerieByName(card.serieName, series)
+          .map(
+              serieToExtend -> {
+                final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
+                return toBuilder()
+                    .series(ListUtils.subst(series, serieToExtend, extendedSerie))
+                    .build();
+              })
+          .orElseGet(
+              () -> {
+                final Optional<CardSerie> maybeDeprecatedSerieToExtend =
+                    getOptionalCardSerieByName(card.serieName, deprecatedSeries);
+                return maybeDeprecatedSerieToExtend
+                    .map(
+                        deprecatedSerieToExtend -> {
+                          final CardSerie extendedDeprecatedSerie =
+                              deprecatedSerieToExtend.addCard(card.orderNumber);
+                          return toBuilder()
+                              .deprecatedSeries(
+                                  ListUtils.subst(
+                                      deprecatedSeries,
+                                      deprecatedSerieToExtend,
+                                      extendedDeprecatedSerie))
+                              .build();
+                        })
+                    .orElseThrow(() -> new NoSuchCardSerie(card.serieName));
+              });
+    }
+
+    public CardClass deprecateSeriesByName(List<String> seriesToDeprecate) {
+        Set<String> seriesToKeep = series.stream().map(serie -> serie.name).collect(Collectors.toSet());
+        for (String serieToDeprecate : seriesToDeprecate) {
+            if (!seriesToKeep.remove(serieToDeprecate))
+                throw new NoSuchCardSerie(serieToDeprecate);
+        }
+        final Map<Boolean, List<CardSerie>> seriesPartition = series.stream().collect(Collectors.partitioningBy(serie -> seriesToKeep.contains(serie.name)));
+        final List<CardSerie> newDeprecatedSeries = new ArrayList<>(deprecatedSeries);
+        newDeprecatedSeries.addAll(seriesPartition.get(false));
+        return toBuilder().series(seriesPartition.get(true)).deprecatedSeries(newDeprecatedSeries).build();
     }
 
     public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
-        return series.stream().filter(serie -> name.equals(serie.name)).findFirst().orElseThrow(() -> new NoSuchCardSerie(name));
+        return getOptionalCardSerieByName(name, series).orElseThrow(() -> new NoSuchCardSerie(name));
+    }
+
+    public CardSerie getDeprecatedCardSerieByName(final String name) throws NoSuchCardSerie {
+        return getOptionalCardSerieByName(name, deprecatedSeries).orElseThrow(() -> new NoSuchCardSerie(name));
+    }
+
+    private Optional<CardSerie> getOptionalCardSerieByName(final String name, final List<CardSerie> series) {
+        return series.stream().filter(serie -> name.equals(serie.name)).findFirst();
     }
 
     public Integer count() {
@@ -94,11 +141,11 @@ public class CardClass {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CardClass that = (CardClass) o;
-        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series);
+        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series) && deprecatedSeries.equals(that.deprecatedSeries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardClass, isInfinite, series);
+        return Objects.hash(cardClass, isInfinite, series, deprecatedSeries);
     }
 }
