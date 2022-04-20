@@ -13,6 +13,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.flatMapping;
+import static java.util.stream.Collectors.toList;
 
 @Data
 @AllArgsConstructor
@@ -80,13 +85,21 @@ public class Talon {
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
   }
 
-  public Talon deprecateSeries(final Map<String, List<String>> seriesToDeprecate) {
+  public record ClassDeprecations(String className, List<String> seriesToDeprecate) {}
+
+  public Talon deprecateSeries(final List<ClassDeprecations> seriesToDeprecate) {
+    final Map<String, List<String>> seriesToDeprecateFromClasses = seriesToDeprecate.stream()
+            .collect(Collectors.groupingBy(
+                    // just for parameter validation
+                    classDeprecations -> getCardClassByName(classDeprecations.className).cardClass,
+                    flatMapping(classDeprecations -> classDeprecations.seriesToDeprecate.stream(), toList())));
     return toBuilder()
             .classes(classes.stream()
-                    .map(cardClass -> {
-                      final List<String> seriesToDeprecateFromClass = seriesToDeprecate.get(cardClass.cardClass);
-                      return seriesToDeprecateFromClass != null ? cardClass.deprecateSeriesByName(seriesToDeprecateFromClass) : cardClass;
-                    })
+                    .map(cardClass ->
+                            Optional.ofNullable(seriesToDeprecateFromClasses.get(cardClass.cardClass))
+                              .map(seriesToDeprecateFromClass -> cardClass.deprecateSeriesByName(seriesToDeprecateFromClass))
+                              .orElse(cardClass)
+                    )
                     .toList())
             .build();
   }
