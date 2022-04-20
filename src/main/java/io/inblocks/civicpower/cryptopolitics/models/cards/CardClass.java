@@ -101,10 +101,15 @@ public class CardClass {
     }
 
     public CardClass deprecateSeriesByName(List<String> seriesToDeprecate) {
-        final Map<Boolean, List<CardSerie>> seriesPartition = series.stream().collect(Collectors.partitioningBy(serie -> seriesToDeprecate.contains(serie.name)));
+        Set<String> seriesToKeep = series.stream().map(serie -> serie.name).collect(Collectors.toSet());
+        for (String serieToDeprecate : seriesToDeprecate) {
+            if (!seriesToKeep.remove(serieToDeprecate))
+                throw new NoSuchCardSerie(serieToDeprecate);
+        }
+        final Map<Boolean, List<CardSerie>> seriesPartition = series.stream().collect(Collectors.partitioningBy(serie -> seriesToKeep.contains(serie.name)));
         final List<CardSerie> newDeprecatedSeries = new ArrayList<>(deprecatedSeries);
-        newDeprecatedSeries.addAll(seriesPartition.get(true));
-        return toBuilder().series(seriesPartition.get(false)).deprecatedSeries(newDeprecatedSeries).build();
+        newDeprecatedSeries.addAll(seriesPartition.get(false));
+        return toBuilder().series(seriesPartition.get(true)).deprecatedSeries(newDeprecatedSeries).build();
     }
 
     public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
