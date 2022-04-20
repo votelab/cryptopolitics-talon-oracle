@@ -189,6 +189,31 @@ class ExtendTalonTransformationTest extends TransformationTest {
             .build();
     Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new ExtendTalonTransformation(setup));
   }
+  @Test
+  void cantUseInfiniteDeprecatedSerieInFiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .isInfinite(false)
+                    .series(Collections.emptyList())
+                    .deprecatedSeries(List.of(new CardSerie("pique", null)))
+                    .build()))
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new ExtendTalonTransformation(setup));
+  }
+
+  @Test
+  void cantUseFiniteDeprecatedSerieInInfiniteClass() {
+    Talon setup = Talon.builder()
+            .classes(List.of(CardClass.builder()
+                    .cardClass("COMMON")
+                    .isInfinite(true)
+                    .series(Collections.emptyList())
+                    .deprecatedSeries(List.of(new CardSerie("pique", 3)))
+                    .build()))
+            .build();
+    Assertions.assertThrows(CardClassFinitudeMismatch.class, () ->  new ExtendTalonTransformation(setup));
+  }
 
   @Test
   void extentTalonPreservesFinitude() {

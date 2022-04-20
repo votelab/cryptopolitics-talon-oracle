@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @Introspected
@@ -38,7 +39,9 @@ public class CardClass {
     }
 
     public void checkFinitudeConsistency() {
-        if (!series.stream().allMatch(serie -> serie.isInfinite() == isInfinite)) {
+    if (!Stream.of(series, deprecatedSeries)
+        .flatMap(Collection::stream)
+        .allMatch(serie -> serie.isInfinite() == isInfinite)) {
             throw new CardClassFinitudeMismatch(cardClass);
         }
     }
