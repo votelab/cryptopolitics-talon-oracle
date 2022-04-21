@@ -171,15 +171,13 @@ components:
       - ETERNAL
     DeprecateSeriesTransformation:
       required:
-      - seriesToDeprecate
+      - deprecatedCards
       type: object
       properties:
-        seriesToDeprecate:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
+        deprecatedCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Talon.ClassDeprecations'
     ExtendTalonTransformation:
       required:
       - additionalCards
@@ -318,6 +316,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CardClass'
+    Talon.ClassDeprecations:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - cardClass
+        - cardSeries
+        type: object
+        properties:
+          cardClass:
+            type: string
+          cardSeries:
+            type: array
+            items:
+              type: string
     TalonController.ApplyTransformationQuery:
       required:
       - transformations
@@ -357,11 +369,11 @@ components:
       allOf:
       - $ref: '#/components/schemas/Record'
       - required:
+        - count
         - selection
-        - times
         type: object
         properties:
-          times:
+          count:
             minimum: 0
             type: integer
             format: int32
