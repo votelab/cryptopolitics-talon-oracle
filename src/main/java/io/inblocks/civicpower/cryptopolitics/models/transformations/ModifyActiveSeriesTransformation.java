@@ -12,17 +12,20 @@ import java.util.List;
 
 @Data
 @Introspected
-public class DeprecateSeriesTransformation implements Transformation {
+public class ModifyActiveSeriesTransformation implements Transformation {
 
   @Valid @NotNull
-  public final List<Talon.ClassDeprecations> deprecatedCards;
+  public final List<Talon.SeriesSelection> retiredCards;
+  @Valid @NotNull
+  public final List<Talon.SeriesSelection> reinstatedCards;
 
-  public DeprecateSeriesTransformation(final List<Talon.ClassDeprecations> deprecatedCards) {
-    this.deprecatedCards = deprecatedCards;
+  public ModifyActiveSeriesTransformation(final List<Talon.SeriesSelection> retiredCards, final List<Talon.SeriesSelection> reinstatedCards) {
+    this.retiredCards = retiredCards;
+    this.reinstatedCards = reinstatedCards;
   }
 
   @Override
   public Talon apply(final Context context, final Talon in) {
-    return in.deprecateSeries(deprecatedCards);
+    return in.modifyActiveSeries(retiredCards, reinstatedCards);
   }
 }

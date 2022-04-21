@@ -28,21 +28,21 @@ public class CardClass {
     @Valid @NotNull @JsonInclude(JsonInclude.Include.ALWAYS)
     public final List<CardSerie> series;
     @Valid @NotNull
-    public final List<CardSerie> deprecatedSeries;
+    public final List<CardSerie> retiredSeries;
 
     static final long LONG_MASK = 0xffffffffL;
 
-    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series, final List<CardSerie> deprecatedSeries) {
+    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series, final List<CardSerie> retiredSeries) {
         this.cardClass = cardClass;
         this.isInfinite = isInfinite;
         this.series = series;
-        this.deprecatedSeries = Optional.ofNullable(deprecatedSeries).orElse(Collections.emptyList());
+        this.retiredSeries = Optional.ofNullable(retiredSeries).orElse(Collections.emptyList());
     }
 
     public void checkFinitudeConsistency() {
-    if (!Stream.of(series, deprecatedSeries)
-        .flatMap(Collection::stream)
-        .allMatch(serie -> serie.isInfinite() == isInfinite)) {
+        if (!Stream.of(series, retiredSeries)
+            .flatMap(Collection::stream)
+            .allMatch(serie -> serie.isInfinite() == isInfinite)) {
             throw new CardClassFinitudeMismatch(cardClass);
         }
     }
@@ -85,43 +85,51 @@ public class CardClass {
               })
           .orElseGet(
               () -> {
-                final Optional<CardSerie> maybeDeprecatedSerieToExtend =
-                    getOptionalCardSerieByName(card.serieName, deprecatedSeries);
-                return maybeDeprecatedSerieToExtend
+                final Optional<CardSerie> maybeRetiredSerieToExtend =
+                    getOptionalCardSerieByName(card.serieName, retiredSeries);
+                return maybeRetiredSerieToExtend
                     .map(
-                        deprecatedSerieToExtend -> {
-                          final CardSerie extendedDeprecatedSerie =
-                              deprecatedSerieToExtend.addCard(card.orderNumber);
+                        retiredSerieToExtend -> {
+                          final CardSerie extendedRetiredSerie =
+                              retiredSerieToExtend.addCard(card.orderNumber);
                           return toBuilder()
-                              .deprecatedSeries(
+                              .retiredSeries(
                                   ListUtils.subst(
-                                      deprecatedSeries,
-                                      deprecatedSerieToExtend,
-                                      extendedDeprecatedSerie))
+                                      retiredSeries, retiredSerieToExtend, extendedRetiredSerie))
                               .build();
                         })
                     .orElseThrow(() -> new NoSuchCardSerie(card.serieName));
               });
     }
 
-    public CardClass deprecateSeriesByName(List<String> seriesToDeprecate) {
-        Set<String> seriesToKeep = series.stream().map(serie -> serie.name).collect(Collectors.toSet());
-        for (String serieToDeprecate : seriesToDeprecate) {
-            if (!seriesToKeep.remove(serieToDeprecate))
-                throw new NoSuchCardSerie(serieToDeprecate);
+    public CardClass modifyActiveSeries(List<String> seriesToRetire, List<String> seriesToReinstate) {
+      final Map<Boolean, List<CardSerie>> activeSeriesPartition = splitSeries(series, seriesToRetire);
+      final Map<Boolean, List<CardSerie>> retiredSeriesPartition = splitSeries(retiredSeries, seriesToReinstate);
+      return toBuilder()
+          .series(
+              ListUtils.concat(activeSeriesPartition.get(true), retiredSeriesPartition.get(false)))
+          .retiredSeries(
+              ListUtils.concat(retiredSeriesPartition.get(true), activeSeriesPartition.get(false)))
+          .build();
+    }
+
+    private Map<Boolean, List<CardSerie>> splitSeries(final List<CardSerie> series, final List<String> seriesToRemove) {
+        Set<String> stayingSeries =
+            series.stream().map(serie -> serie.name).collect(Collectors.toSet());
+        for (String serieToRemove : seriesToRemove) {
+            if (!stayingSeries.remove(serieToRemove)) throw new NoSuchCardSerie(serieToRemove);
         }
-        final Map<Boolean, List<CardSerie>> seriesPartition = series.stream().collect(Collectors.partitioningBy(serie -> seriesToKeep.contains(serie.name)));
-        final List<CardSerie> newDeprecatedSeries = new ArrayList<>(deprecatedSeries);
-        newDeprecatedSeries.addAll(seriesPartition.get(false));
-        return toBuilder().series(seriesPartition.get(true)).deprecatedSeries(newDeprecatedSeries).build();
+        return series.stream()
+            .collect(Collectors.partitioningBy(serie -> stayingSeries.contains(serie.name)));
     }
 
     public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
         return getOptionalCardSerieByName(name, series).orElseThrow(() -> new NoSuchCardSerie(name));
     }
 
-    public CardSerie getDeprecatedCardSerieByName(final String name) throws NoSuchCardSerie {
-        return getOptionalCardSerieByName(name, deprecatedSeries).orElseThrow(() -> new NoSuchCardSerie(name));
+    public CardSerie getRetiredCardSerieByName(final String name) throws NoSuchCardSerie {
+        return getOptionalCardSerieByName(name, retiredSeries)
+          .orElseThrow(() -> new NoSuchCardSerie(name));
     }
 
     private Optional<CardSerie> getOptionalCardSerieByName(final String name, final List<CardSerie> series) {
@@ -145,11 +153,11 @@ public class CardClass {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CardClass that = (CardClass) o;
-        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series) && deprecatedSeries.equals(that.deprecatedSeries);
+        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series) && retiredSeries.equals(that.retiredSeries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardClass, isInfinite, series, deprecatedSeries);
+        return Objects.hash(cardClass, isInfinite, series, retiredSeries);
     }
 }

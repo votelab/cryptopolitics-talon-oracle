@@ -92,7 +92,7 @@ class TalonTest {
   }
 
   @Test
-  void deprecateSeries() {
+  void retireSeries() {
     final CardSerie serieOne = new CardSerie("one", 1);
     final CardSerie serieTwo = new CardSerie("two", 1);
     final CardSerie serieThree = new CardSerie("three", 1);
@@ -111,19 +111,51 @@ class TalonTest {
                             .build()
             ))
             .build();
-    final Talon newTalon = talon.deprecateSeries(List.of(
-            new Talon.ClassDeprecations(COMMON_CLASS, List.of("two")),
-            new Talon.ClassDeprecations(EPIC_CLASS, List.of("three"))));
+    final Talon newTalon = talon.modifyActiveSeries(List.of(
+            new Talon.SeriesSelection(COMMON_CLASS, List.of("two")),
+            new Talon.SeriesSelection(EPIC_CLASS, List.of("three"))), null);
     final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
     Assertions.assertEquals(List.of(serieOne), newCommonClass.series);
-    Assertions.assertEquals(List.of(serieTwo), newCommonClass.deprecatedSeries);
+    Assertions.assertEquals(List.of(serieTwo), newCommonClass.retiredSeries);
     final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
     Assertions.assertEquals(List.of(serieFour), newEpicClass.series);
-    Assertions.assertEquals(List.of(serieThree), newEpicClass.deprecatedSeries);
+    Assertions.assertEquals(List.of(serieThree), newEpicClass.retiredSeries);
+  }
+  @Test
+  void reinstateSeries() {
+    final CardSerie serieOne = new CardSerie("one", 1);
+    final CardSerie serieTwo = new CardSerie("two", 1);
+    final CardSerie serieThree = new CardSerie("three", 1);
+    final CardSerie serieFour = new CardSerie("four", 1);
+    final Talon talon = Talon.builder()
+            .classes(List.of(
+                    CardClass.builder()
+                            .cardClass(COMMON_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieOne))
+                            .retiredSeries(List.of(serieTwo))
+                            .build(),
+                    CardClass.builder()
+                            .cardClass(EPIC_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieFour))
+                            .retiredSeries(List.of(serieThree))
+                            .build()
+            ))
+            .build();
+    final Talon newTalon = talon.modifyActiveSeries(null, List.of(
+            new Talon.SeriesSelection(COMMON_CLASS, List.of("two")),
+            new Talon.SeriesSelection(EPIC_CLASS, List.of("three"))));
+    final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
+    Assertions.assertEquals(List.of(serieOne, serieTwo), newCommonClass.series);
+    Assertions.assertEquals(List.of(), newCommonClass.retiredSeries);
+    final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
+    Assertions.assertEquals(List.of(serieFour, serieThree), newEpicClass.series);
+    Assertions.assertEquals(List.of(), newEpicClass.retiredSeries);
   }
 
   @Test
-  void deprecateSerieFromUnexistingClass() {
+  void retireSerieFromUnexistingClass() {
     final CardSerie serieOne = new CardSerie("one", 1);
     final Talon talon = Talon.builder()
             .classes(List.of(
@@ -134,6 +166,21 @@ class TalonTest {
                             .build()
             ))
             .build();
-    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.deprecateSeries(List.of(new Talon.ClassDeprecations("FREE", List.of("one")))));
+    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.modifyActiveSeries(List.of(new Talon.SeriesSelection("FREE", List.of("one"))), null));
+  }
+
+  @Test
+  void reinstateSerieFromUnexistingClass() {
+    final CardSerie serieOne = new CardSerie("one", 1);
+    final Talon talon = Talon.builder()
+            .classes(List.of(
+                    CardClass.builder()
+                            .cardClass(COMMON_CLASS)
+                            .isInfinite(false)
+                            .series(List.of(serieOne))
+                            .build()
+            ))
+            .build();
+    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.modifyActiveSeries(null, List.of(new Talon.SeriesSelection("FREE", List.of("one")))));
   }
 }

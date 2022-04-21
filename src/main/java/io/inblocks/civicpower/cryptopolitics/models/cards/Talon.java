@@ -10,10 +10,7 @@ import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.flatMapping;
@@ -85,23 +82,30 @@ public class Talon {
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
   }
 
-  public record ClassDeprecations(String cardClass, List<String> cardSeries) {}
+  public record SeriesSelection(String cardClass, List<String> cardSeries) {}
 
-  public Talon deprecateSeries(final List<ClassDeprecations> seriesToDeprecate) {
-    final Map<String, List<String>> seriesToDeprecateByClass = seriesToDeprecate.stream()
+  public Talon modifyActiveSeries(final List<SeriesSelection> seriesToRetire, final List<SeriesSelection> seriesToReinstate) {
+    final Map<String, List<String>> seriesToRetireByClass = toSeriesByClass(seriesToRetire);
+    final Map<String, List<String>> seriesToReinstateByClass = toSeriesByClass(seriesToReinstate);
+    return toBuilder()
+        .classes(
+            classes.stream()
+                .map(
+                    cardClass -> cardClass.modifyActiveSeries(
+                            Optional.ofNullable(seriesToRetireByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()),
+                            Optional.ofNullable(seriesToReinstateByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()))
+                )
+                .toList())
+        .build();
+  }
+
+  private Map<String, List<String>> toSeriesByClass(final List<SeriesSelection> seriesSelections) {
+    return seriesSelections == null || seriesSelections.isEmpty() ? Collections.emptyMap() :
+            seriesSelections.stream()
             .collect(Collectors.groupingBy(
                     // just for parameter validation
-                    classDeprecations -> getCardClassByName(classDeprecations.cardClass).cardClass,
-                    flatMapping(classDeprecations -> classDeprecations.cardSeries.stream(), toList())));
-    return toBuilder()
-            .classes(classes.stream()
-                    .map(cardClass ->
-                            Optional.ofNullable(seriesToDeprecateByClass.get(cardClass.cardClass))
-                              .map(seriesToDeprecateFromClass -> cardClass.deprecateSeriesByName(seriesToDeprecateFromClass))
-                              .orElse(cardClass)
-                    )
-                    .toList())
-            .build();
+                    seriesSelection -> getCardClassByName(seriesSelection.cardClass).cardClass,
+                    flatMapping(seriesSelection -> seriesSelection.cardSeries.stream(), toList())));
   }
 
   @Override
