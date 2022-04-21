@@ -14,6 +14,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Data
@@ -56,12 +57,16 @@ public class ExtendTalonTransformation implements Transformation {
                       Stream.concat(
                               mergeSeries(cardClassData, extra), addNewSeries(cardClassData, extra))
                           .toList())
+                  .retiredSeries(
+                      Stream.concat(
+                              mergeRetiredSeries(cardClassData, extra), addNewRetiredSeries(cardClassData, extra))
+                          .toList())
                   .build();
             });
   }
 
     private void checkClassesCompatibility(CardClass cardClassData, CardClass extra) {
-        if (cardClassData.isInfinite != extra.isInfinite)
+        if (!Objects.equals(cardClassData.isInfinite, extra.isInfinite))
             throw new CardClassFinitudeMismatch(extra.cardClass);
     }
 
@@ -75,13 +80,31 @@ public class ExtendTalonTransformation implements Transformation {
               } catch (NoSuchCardSerie e) {
                 return cardSerieData;
               }
-              checkSeriesCompatibility(cardSerieData, extraSerie);
-              final int newSize = cardSerieData.size + extraSerie.size;
-              final BigInteger newSetBitmap =
-                  cardSerieData.setBitmap.or(extraSerie.setBitmap.shiftLeft(cardSerieData.size));
-              return cardSerieData.toBuilder().size(newSize).setBitmap(newSetBitmap).build();
+                return buildMergedSerie(cardSerieData, extraSerie);
             });
   }
+
+    private CardSerie buildMergedSerie(final CardSerie cardSerie, final CardSerie extraSerie) {
+        checkSeriesCompatibility(cardSerie, extraSerie);
+        final int newSize = cardSerie.size + extraSerie.size;
+        final BigInteger newSetBitmap =
+            cardSerie.setBitmap.or(extraSerie.setBitmap.shiftLeft(cardSerie.size));
+        return cardSerie.toBuilder().size(newSize).setBitmap(newSetBitmap).build();
+    }
+
+    private Stream<CardSerie> mergeRetiredSeries(CardClass cardClass, CardClass extraCardClass) {
+        return cardClass.retiredSeries.stream()
+                .map(
+                        cardSerieData -> {
+                            CardSerie extraSerie;
+                            try {
+                                extraSerie = extraCardClass.getRetiredCardSerieByName(cardSerieData.name);
+                            } catch (NoSuchCardSerie e) {
+                                return cardSerieData;
+                            }
+                            return buildMergedSerie(cardSerieData, extraSerie);
+                        });
+    }
 
     private void checkSeriesCompatibility(CardSerie cardSerieData, CardSerie extraSerie) {
         if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
@@ -100,6 +123,19 @@ public class ExtendTalonTransformation implements Transformation {
               return Stream.empty();
             });
   }
+
+    private Stream<CardSerie> addNewRetiredSeries(CardClass cardClass, CardClass extra) {
+        return extra.retiredSeries.stream()
+                .flatMap(
+                        extraCardSerieData -> {
+                            try {
+                                cardClass.getRetiredCardSerieByName(extraCardSerieData.name);
+                            } catch (NoSuchCardSerie e) {
+                                return Stream.of(extraCardSerieData);
+                            }
+                            return Stream.empty();
+                        });
+    }
 
   private Stream<CardClass> addNewClasses(Talon in, Talon additionalCards) {
     return additionalCards.classes.stream()

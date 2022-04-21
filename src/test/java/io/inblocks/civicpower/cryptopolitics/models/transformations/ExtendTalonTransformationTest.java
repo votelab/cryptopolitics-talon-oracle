@@ -65,6 +65,35 @@ class ExtendTalonTransformationTest extends TransformationTest {
   }
 
   @Test
+  void addNewRetiredSerieInExistingClass() {
+    Talon talon = getInitialTalon();
+    final CardSerie newSerie = new CardSerie("clean", 4);
+    final CardClass newClass =
+            CardClass.builder()
+                    .cardClass("COMMON")
+                    .isInfinite(false)
+                    .series(List.of())
+                    .retiredSeries(Collections.singletonList(newSerie))
+                    .build();
+    ExtendTalonTransformation transformation =
+            new ExtendTalonTransformation(
+                    Talon.builder().classes(Collections.singletonList(newClass)).build());
+    Talon newTalon = transformation.apply(makeSomeContext(), talon);
+    Assertions.assertEquals(1, newTalon.classes.size());
+    CardClass cardClass = newTalon.getCardClassByName("COMMON");
+    Assertions.assertEquals(2, cardClass.series.size());
+    Assertions.assertEquals(
+            talon.getCardClassByName("COMMON").getCardSerieByName("first"),
+            cardClass.getCardSerieByName("first"));
+    Assertions.assertEquals(
+            talon.getCardClassByName("COMMON").getCardSerieByName("second"),
+            cardClass.getCardSerieByName("second"));
+    Assertions.assertEquals(1, cardClass.retiredSeries.size());
+    Assertions.assertEquals(newSerie, cardClass.getRetiredCardSerieByName("clean"));
+    Assertions.assertNull(transformation.getResults());
+  }
+
+  @Test
   void extendExistingSerie() {
     Talon talon = getInitialTalon();
     final CardClass classExtension =
@@ -251,7 +280,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
   }
 
   @Test
-  void canExtendFiniteClassWithInfiniteClass() {
+  void cantExtendFiniteClassWithInfiniteClass() {
     Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
                     .isInfinite(false)
@@ -269,7 +298,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
   }
 
   @Test
-  void canExtendInfiniteClassWithfiniteClass() {
+  void cantExtendInfiniteClassWithfiniteClass() {
     Talon firstTalon = Talon.builder().classes(List.of(CardClass.builder()
             .cardClass("COMMON")
             .isInfinite(true)
