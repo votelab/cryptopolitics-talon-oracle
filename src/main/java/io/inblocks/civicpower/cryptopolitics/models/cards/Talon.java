@@ -3,6 +3,8 @@ package io.inblocks.civicpower.cryptopolitics.models.cards;
 import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
+import io.inblocks.civicpower.cryptopolitics.models.SerieRetirement;
+import io.inblocks.civicpower.cryptopolitics.models.SeriesRetirementsByClass;
 import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -82,30 +84,26 @@ public class Talon {
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
   }
 
-  public record SeriesSelection(String cardClass, List<String> cardSeries) {}
-
-  public Talon modifyActiveSeries(final List<SeriesSelection> seriesToRetire, final List<SeriesSelection> seriesToReinstate) {
-    final Map<String, List<String>> seriesToRetireByClass = toSeriesByClass(seriesToRetire);
-    final Map<String, List<String>> seriesToReinstateByClass = toSeriesByClass(seriesToReinstate);
+  public Talon retireSeries(final List<SeriesRetirementsByClass> seriesToRetire) {
+    final Map<String, List<SerieRetirement>> serieRetirementsByClass = toSerieRetirementsByClass(seriesToRetire);
     return toBuilder()
         .classes(
             classes.stream()
                 .map(
-                    cardClass -> cardClass.modifyActiveSeries(
-                            Optional.ofNullable(seriesToRetireByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()),
-                            Optional.ofNullable(seriesToReinstateByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()))
+                    cardClass -> cardClass.retireSeries(
+                            Optional.ofNullable(serieRetirementsByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()))
                 )
                 .toList())
         .build();
   }
 
-  private Map<String, List<String>> toSeriesByClass(final List<SeriesSelection> seriesSelections) {
-    return seriesSelections == null || seriesSelections.isEmpty() ? Collections.emptyMap() :
-            seriesSelections.stream()
+  private Map<String, List<SerieRetirement>> toSerieRetirementsByClass(final List<SeriesRetirementsByClass> seriesToRetire) {
+    return seriesToRetire == null || seriesToRetire.isEmpty() ? Collections.emptyMap() :
+            seriesToRetire.stream()
             .collect(Collectors.groupingBy(
                     // just for parameter validation
-                    seriesSelection -> getCardClassByName(seriesSelection.cardClass).cardClass,
-                    flatMapping(seriesSelection -> seriesSelection.cardSeries.stream(), toList())));
+                    seriesRetirementsByClass -> getCardClassByName(seriesRetirementsByClass.cardClass()).cardClass,
+                    flatMapping(seriesRetirementsByClass -> seriesRetirementsByClass.cardSeries().stream(), toList())));
   }
 
   @Override

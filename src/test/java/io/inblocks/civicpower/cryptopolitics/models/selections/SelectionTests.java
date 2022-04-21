@@ -11,10 +11,10 @@ public abstract class SelectionTests {
         return Talon.builder().classes(List.of(CardClass.builder()
                 .cardClass("Black")
                 .isInfinite(false)
-                .series(List.of(new CardSerie("piques", 13), new CardSerie("spades", 13)))
+                .series(List.of(new CardSerie("piques", 13, false), new CardSerie("spades", 13, false)))
                 .build(), CardClass.builder()
                 .cardClass("Red")
                 .isInfinite(false)
-                .series(List.of(new CardSerie("hearts", 13), new CardSerie("tiles", 13))).build())).build();
+                .series(List.of(new CardSerie("hearts", 13, false), new CardSerie("tiles", 13, false))).build())).build();
     }
 }

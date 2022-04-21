@@ -21,14 +21,16 @@ import java.util.Objects;
 public class CardSerie {
     @NotNull public final String name;
     public final Integer size;
+    public final boolean retired;
     @Schema(description = "Base64 encoding of the bitmap of cards present", implementation = String.class, example = "A////w==")
     public final BigInteger setBitmap; // BitSet another possibility  // finite series
     public final Integer unminted;                                    // infinite series
     @NotNull public final Integer initialDealIndex;
 
-    public CardSerie(final String name, final Integer size) {
+    public CardSerie(final String name, final Integer size, final boolean retired) {
         this.name = name;
         this.size = size;
+        this.retired = retired;
         setBitmap = isInfinite() ? null : BigInteger.ONE.shiftLeft(size).subtract(BigInteger.ONE);
         unminted = isInfinite() ? 0 : null;
         initialDealIndex = 0;
@@ -103,11 +105,11 @@ public class CardSerie {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CardSerie that = (CardSerie) o;
-        return Objects.equals(size, that.size) && name.equals(that.name) && Objects.equals(setBitmap, that.setBitmap) && Objects.equals(unminted, that.unminted) && initialDealIndex.equals(that.initialDealIndex);
+        return Objects.equals(size, that.size) && name.equals(that.name) && Objects.equals(retired, that.retired) && Objects.equals(setBitmap, that.setBitmap) && Objects.equals(unminted, that.unminted) && initialDealIndex.equals(that.initialDealIndex);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size, setBitmap, unminted, initialDealIndex);
+        return Objects.hash(name, size, retired, setBitmap, unminted, initialDealIndex);
     }
 }

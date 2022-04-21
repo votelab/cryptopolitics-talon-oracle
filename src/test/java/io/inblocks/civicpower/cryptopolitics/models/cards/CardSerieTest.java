@@ -13,51 +13,51 @@ class CardSerieTest {
 
     @Test
     void createSerieOfOneCard() {
-        final CardSerie serie = new CardSerie("test", 1);
+        final CardSerie serie = new CardSerie("test", 1, false);
         Assertions.assertEquals(BigInteger.ONE, serie.setBitmap);
     }
 
     @Test
     void createSerieOfTwoCards() {
-        final CardSerie serie = new CardSerie("test", 2);
+        final CardSerie serie = new CardSerie("test", 2, false);
         Assertions.assertEquals(BigInteger.valueOf(3), serie.setBitmap);
     }
 
     @Test
     void removeACard() {
-        final CardSerie serie = new CardSerie("test", 3);
+        final CardSerie serie = new CardSerie("test", 3, false);
         final CardSerie modifiedSerie = serie.removeCard(2);
         Assertions.assertEquals(BigInteger.valueOf(5), modifiedSerie.setBitmap);
     }
 
     @Test
     void cantRemoveAMissingCard() {
-        final CardSerie serie = new CardSerie("test", 3).removeCard(2);
+        final CardSerie serie = new CardSerie("test", 3, false).removeCard(2);
         Assertions.assertThrows(NoSuchCard.class, () -> serie.removeCard(2));
     }
 
     @Test
     void addACard() {
-        final CardSerie serie = new CardSerie("test", 3).removeCard(2);
+        final CardSerie serie = new CardSerie("test", 3, false).removeCard(2);
         CardSerie modifiedSerie = serie.addCard(2);
         Assertions.assertEquals(BigInteger.valueOf(7), modifiedSerie.setBitmap);
     }
 
     @Test
     void cantAddAnAlreadyPresentCard() {
-        final CardSerie serie = new CardSerie("test", 3);
+        final CardSerie serie = new CardSerie("test", 3, false);
         Assertions.assertThrows(CardAlreadyPresent.class, () -> serie.addCard(2));
     }
 
     @Test
     void cantDealOffAnEmptySerie() {
-        CardSerie serie = new CardSerie("test", 1).pickCard().remainingCards;
+        CardSerie serie = new CardSerie("test", 1, false).pickCard().remainingCards;
         Assertions.assertThrows(IllegalArgumentException.class, serie::pickCard);
     }
 
     @Test
     void firstDealCardsInIncreasingOrderNumbers() {
-        final CardSerie serie = new CardSerie("test", 2);
+        final CardSerie serie = new CardSerie("test", 2, false);
         final CardSerie.PickCardResult result1 = serie.pickCard();
         Assertions.assertEquals(1, result1.cardOrderNumber);
         final CardSerie result1p = result1.remainingCards.addCard(1); // Even if we put back card #1
@@ -67,7 +67,7 @@ class CardSerieTest {
 
     @Test
     void laterDealDiscardedCardsOfHighestOrderNumbers() {
-        final CardSerie exhaustedSerie = new CardSerie("test", 2).pickCard().remainingCards.pickCard().remainingCards;
+        final CardSerie exhaustedSerie = new CardSerie("test", 2, false).pickCard().remainingCards.pickCard().remainingCards;
         final CardSerie serie = exhaustedSerie.addCard(1).addCard(2);
         final CardSerie.PickCardResult result1 = serie.pickCard();
         Assertions.assertEquals(2, result1.cardOrderNumber);
@@ -77,7 +77,7 @@ class CardSerieTest {
 
     @Test
     void neverReturnIntoInitialDealState() {
-        final CardSerie exhaustedSerie = new CardSerie("test", 3)
+        final CardSerie exhaustedSerie = new CardSerie("test", 3, false)
                 .pickCard().remainingCards
                 .pickCard().remainingCards
                 .pickCard().remainingCards;
@@ -89,15 +89,15 @@ class CardSerieTest {
 
     @Test
     void createInfiniteSerie() {
-        final CardSerie finiteSerie = new CardSerie("test", 3);
+        final CardSerie finiteSerie = new CardSerie("test", 3, false);
         Assertions.assertFalse(finiteSerie.isInfinite());
-        final CardSerie infiniteSerie = new CardSerie("test", null);
+        final CardSerie infiniteSerie = new CardSerie("test", null, false);
         Assertions.assertTrue(infiniteSerie.isInfinite());
     }
 
     @Test
     void removeCardsFrominfiniteSerie() {
-        final CardSerie infiniteSerie = new CardSerie("test", null);
+        final CardSerie infiniteSerie = new CardSerie("test", null, false);
         CardSerie.PickCardResult pickCardResult1 = infiniteSerie.pickCard();
         Assertions.assertEquals(1, pickCardResult1.cardOrderNumber);
         CardSerie.PickCardResult pickCardResult2 = pickCardResult1.remainingCards.pickCard();
@@ -107,7 +107,7 @@ class CardSerieTest {
 
     @Test
     void addACardToInfiniteSerie() {
-        final CardSerie.PickCardResult pickCardResult1 = new CardSerie("test", null).pickCard();
+        final CardSerie.PickCardResult pickCardResult1 = new CardSerie("test", null, false).pickCard();
         CardSerie revertedSerie = pickCardResult1.remainingCards.addCard(pickCardResult1.cardOrderNumber);
         Assertions.assertEquals(1, revertedSerie.unminted);
         final CardSerie.PickCardResult pickCardResult2 = revertedSerie.pickCard();

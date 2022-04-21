@@ -57,10 +57,6 @@ public class ExtendTalonTransformation implements Transformation {
                       Stream.concat(
                               mergeSeries(cardClassData, extra), addNewSeries(cardClassData, extra))
                           .toList())
-                  .retiredSeries(
-                      Stream.concat(
-                              mergeRetiredSeries(cardClassData, extra), addNewRetiredSeries(cardClassData, extra))
-                          .toList())
                   .build();
             });
   }
@@ -92,23 +88,11 @@ public class ExtendTalonTransformation implements Transformation {
         return cardSerie.toBuilder().size(newSize).setBitmap(newSetBitmap).build();
     }
 
-    private Stream<CardSerie> mergeRetiredSeries(CardClass cardClass, CardClass extraCardClass) {
-        return cardClass.retiredSeries.stream()
-                .map(
-                        cardSerieData -> {
-                            CardSerie extraSerie;
-                            try {
-                                extraSerie = extraCardClass.getRetiredCardSerieByName(cardSerieData.name);
-                            } catch (NoSuchCardSerie e) {
-                                return cardSerieData;
-                            }
-                            return buildMergedSerie(cardSerieData, extraSerie);
-                        });
-    }
-
     private void checkSeriesCompatibility(CardSerie cardSerieData, CardSerie extraSerie) {
         if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
             throw new IllegalArgumentException("Additional talon should be totally unused");
+        if (extraSerie.retired != cardSerieData.retired)
+            throw new IllegalArgumentException("Serie retirement mismatch");
     }
 
     private Stream<CardSerie> addNewSeries(CardClass cardClass, CardClass extra) {
@@ -123,19 +107,6 @@ public class ExtendTalonTransformation implements Transformation {
               return Stream.empty();
             });
   }
-
-    private Stream<CardSerie> addNewRetiredSeries(CardClass cardClass, CardClass extra) {
-        return extra.retiredSeries.stream()
-                .flatMap(
-                        extraCardSerieData -> {
-                            try {
-                                cardClass.getRetiredCardSerieByName(extraCardSerieData.name);
-                            } catch (NoSuchCardSerie e) {
-                                return Stream.of(extraCardSerieData);
-                            }
-                            return Stream.empty();
-                        });
-    }
 
   private Stream<CardClass> addNewClasses(Talon in, Talon additionalCards) {
     return additionalCards.classes.stream()
