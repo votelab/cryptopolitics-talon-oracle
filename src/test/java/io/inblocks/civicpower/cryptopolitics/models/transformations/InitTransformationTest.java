@@ -27,7 +27,7 @@ class InitTransformationTest extends TransformationTest {
                             CardClass.builder()
                                     .cardClass("COMMON")
                                     .isInfinite(false)
-                                    .series(List.of(new CardSerie("cards", 52)))
+                                    .series(List.of(new CardSerie("cards", 52, false)))
                                     .build()))
             .build();
     Talon setup =
@@ -39,10 +39,10 @@ class InitTransformationTest extends TransformationTest {
                         .isInfinite(false)
                         .series(
                             Arrays.asList(
-                                new CardSerie("pique", 13),
-                                new CardSerie("coeur", 13),
-                                new CardSerie("carreau", 13),
-                                new CardSerie("trèfle", 13)))
+                                new CardSerie("pique", 13, false),
+                                new CardSerie("coeur", 13, false),
+                                new CardSerie("carreau", 13, false),
+                                new CardSerie("trèfle", 13, false)))
                         .build()))
                 .build();
     SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()
@@ -65,10 +65,10 @@ class InitTransformationTest extends TransformationTest {
                         .isInfinite(false)
                         .series(
                             Arrays.asList(
-                                new CardSerie("pique", 13),
-                                new CardSerie("coeur", 13),
-                                new CardSerie("carreau", 13),
-                                new CardSerie("trèfle", 13)))
+                                new CardSerie("pique", 13, false),
+                                new CardSerie("coeur", 13, false),
+                                new CardSerie("carreau", 13, false),
+                                new CardSerie("trèfle", 13, false)))
                         .build()))
                 .build();
     SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()
@@ -89,7 +89,7 @@ class InitTransformationTest extends TransformationTest {
             .classes(List.of(CardClass.builder()
                             .cardClass("COMMON")
                             .isInfinite(false)
-                            .series(List.of(new CardSerie("pique", null)))
+                            .series(List.of(new CardSerie("pique", null, false)))
                     .build()))
             .build();
     SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()
@@ -105,7 +105,7 @@ class InitTransformationTest extends TransformationTest {
             .classes(List.of(CardClass.builder()
                     .cardClass("COMMON")
                             .isInfinite(true)
-                    .series(List.of(new CardSerie("pique", 3)))
+                    .series(List.of(new CardSerie("pique", 3, false)))
                     .build()))
             .build();
     SeedGeneratorParams seedGeneratorParams = SeedGeneratorParams.builder()

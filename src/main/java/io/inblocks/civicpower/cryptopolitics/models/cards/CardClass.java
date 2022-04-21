@@ -6,6 +6,7 @@ import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
+import io.inblocks.civicpower.cryptopolitics.models.SerieRetirement;
 import io.inblocks.civicpower.cryptopolitics.models.Weighted;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Builder;
@@ -13,9 +14,10 @@ import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Data
 @Introspected
@@ -27,22 +29,17 @@ public class CardClass {
     public final Boolean isInfinite;
     @Valid @NotNull @JsonInclude(JsonInclude.Include.ALWAYS)
     public final List<CardSerie> series;
-    @Valid @NotNull
-    public final List<CardSerie> deprecatedSeries;
 
     static final long LONG_MASK = 0xffffffffL;
 
-    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series, final List<CardSerie> deprecatedSeries) {
+    public CardClass(final String cardClass, final Boolean isInfinite, final List<CardSerie> series) {
         this.cardClass = cardClass;
         this.isInfinite = isInfinite;
         this.series = series;
-        this.deprecatedSeries = Optional.ofNullable(deprecatedSeries).orElse(Collections.emptyList());
     }
 
     public void checkFinitudeConsistency() {
-    if (!Stream.of(series, deprecatedSeries)
-        .flatMap(Collection::stream)
-        .allMatch(serie -> serie.isInfinite() == isInfinite)) {
+        if (!series.stream().allMatch(serie -> serie.isInfinite() == isInfinite)) {
             throw new CardClassFinitudeMismatch(cardClass);
         }
     }
@@ -56,13 +53,14 @@ public class CardClass {
 
     public PickCardResult pickCard(long seed) {
         final CardSerie serie;
+        final List<CardSerie> activeSeries = series.stream().filter(s -> !s.retired).toList();
         if (isInfinite) {
-            if (series.isEmpty())
+            if (activeSeries.isEmpty())
                 throw new CardClassEmpty(cardClass);
-            serie = series.get((int) ((seed & LONG_MASK) % series.size()));
+            serie = activeSeries.get((int) ((seed & LONG_MASK) % activeSeries.size()));
         } else {
             try {
-                serie = Weighted.select(series.stream().map(s -> new Weighted<>(s, s.count())).toList(), seed);
+                serie = Weighted.select(activeSeries.stream().map(s -> new Weighted<>(s, s.count())).toList(), seed);
             } catch (IllegalArgumentException e) {
                 throw new CardClassEmpty(cardClass);
             }
@@ -75,57 +73,33 @@ public class CardClass {
     }
 
     public CardClass addCard(Card card) throws NoSuchCardSerie {
-      return getOptionalCardSerieByName(card.serieName, series)
-          .map(
-              serieToExtend -> {
-                final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
-                return toBuilder()
-                    .series(ListUtils.subst(series, serieToExtend, extendedSerie))
-                    .build();
-              })
-          .orElseGet(
-              () -> {
-                final Optional<CardSerie> maybeDeprecatedSerieToExtend =
-                    getOptionalCardSerieByName(card.serieName, deprecatedSeries);
-                return maybeDeprecatedSerieToExtend
-                    .map(
-                        deprecatedSerieToExtend -> {
-                          final CardSerie extendedDeprecatedSerie =
-                              deprecatedSerieToExtend.addCard(card.orderNumber);
-                          return toBuilder()
-                              .deprecatedSeries(
-                                  ListUtils.subst(
-                                      deprecatedSeries,
-                                      deprecatedSerieToExtend,
-                                      extendedDeprecatedSerie))
-                              .build();
-                        })
-                    .orElseThrow(() -> new NoSuchCardSerie(card.serieName));
-              });
+        final CardSerie serieToExtend = getCardSerieByName(card.serieName);
+        final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
+        return toBuilder()
+            .series(ListUtils.subst(series, serieToExtend, extendedSerie))
+            .build();
     }
 
-    public CardClass deprecateSeriesByName(List<String> seriesToDeprecate) {
-        Set<String> seriesToKeep = series.stream().map(serie -> serie.name).collect(Collectors.toSet());
-        for (String serieToDeprecate : seriesToDeprecate) {
-            if (!seriesToKeep.remove(serieToDeprecate))
-                throw new NoSuchCardSerie(serieToDeprecate);
+    public CardClass retireSeries(List<SerieRetirement> seriesRetirements) {
+        Map<String, Boolean> newRetirements = series.stream().collect(Collectors.toMap(serie -> serie.name, serie -> serie.retired));
+        for (SerieRetirement serieRetirement : seriesRetirements) {
+            if (!newRetirements.containsKey(serieRetirement.serieName()))
+                throw new NoSuchCardSerie(serieRetirement.serieName());
+            newRetirements.put(serieRetirement.serieName(), serieRetirement.isRetired());
         }
-        final Map<Boolean, List<CardSerie>> seriesPartition = series.stream().collect(Collectors.partitioningBy(serie -> seriesToKeep.contains(serie.name)));
-        final List<CardSerie> newDeprecatedSeries = new ArrayList<>(deprecatedSeries);
-        newDeprecatedSeries.addAll(seriesPartition.get(false));
-        return toBuilder().series(seriesPartition.get(true)).deprecatedSeries(newDeprecatedSeries).build();
+        return toBuilder()
+                .series(series.stream()
+                            .map(serie -> {
+                                final Boolean shouldBeRetired = newRetirements.get(serie.name);
+                                return serie.retired != shouldBeRetired ? serie.toBuilder().retired(shouldBeRetired).build() : serie;
+                            })
+                            .toList()
+                        )
+                .build();
     }
 
     public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
-        return getOptionalCardSerieByName(name, series).orElseThrow(() -> new NoSuchCardSerie(name));
-    }
-
-    public CardSerie getDeprecatedCardSerieByName(final String name) throws NoSuchCardSerie {
-        return getOptionalCardSerieByName(name, deprecatedSeries).orElseThrow(() -> new NoSuchCardSerie(name));
-    }
-
-    private Optional<CardSerie> getOptionalCardSerieByName(final String name, final List<CardSerie> series) {
-        return series.stream().filter(serie -> name.equals(serie.name)).findFirst();
+        return series.stream().filter(serie -> name.equals(serie.name)).findFirst().orElseThrow(() -> new NoSuchCardSerie(name));
     }
 
     public Integer count() {
@@ -134,7 +108,8 @@ public class CardClass {
         else {
             int total = 0;
             for (CardSerie serie : series) {
-                total += serie.count();
+                if (!serie.retired)
+                    total += serie.count();
             }
             return total;
         }
@@ -145,11 +120,11 @@ public class CardClass {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CardClass that = (CardClass) o;
-        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series) && deprecatedSeries.equals(that.deprecatedSeries);
+        return cardClass.equals(that.cardClass) && isInfinite == that.isInfinite && series.equals(that.series);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardClass, isInfinite, series, deprecatedSeries);
+        return Objects.hash(cardClass, isInfinite, series);
     }
 }

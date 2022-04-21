@@ -3,6 +3,8 @@ package io.inblocks.civicpower.cryptopolitics.models.cards;
 import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
+import io.inblocks.civicpower.cryptopolitics.models.SerieRetirement;
+import io.inblocks.civicpower.cryptopolitics.models.SeriesRetirementsByClass;
 import io.micronaut.core.annotation.Introspected;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,10 +12,7 @@ import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.flatMapping;
@@ -85,23 +84,26 @@ public class Talon {
         .orElseThrow(() -> new NoSuchCardClass(classToPickFrom));
   }
 
-  public record ClassDeprecations(String cardClass, List<String> cardSeries) {}
+  public Talon retireSeries(final List<SeriesRetirementsByClass> seriesToRetire) {
+    final Map<String, List<SerieRetirement>> serieRetirementsByClass = toSerieRetirementsByClass(seriesToRetire);
+    return toBuilder()
+        .classes(
+            classes.stream()
+                .map(
+                    cardClass -> cardClass.retireSeries(
+                            Optional.ofNullable(serieRetirementsByClass.get(cardClass.cardClass)).orElse(Collections.emptyList()))
+                )
+                .toList())
+        .build();
+  }
 
-  public Talon deprecateSeries(final List<ClassDeprecations> seriesToDeprecate) {
-    final Map<String, List<String>> seriesToDeprecateByClass = seriesToDeprecate.stream()
+  private Map<String, List<SerieRetirement>> toSerieRetirementsByClass(final List<SeriesRetirementsByClass> seriesToRetire) {
+    return seriesToRetire == null || seriesToRetire.isEmpty() ? Collections.emptyMap() :
+            seriesToRetire.stream()
             .collect(Collectors.groupingBy(
                     // just for parameter validation
-                    classDeprecations -> getCardClassByName(classDeprecations.cardClass).cardClass,
-                    flatMapping(classDeprecations -> classDeprecations.cardSeries.stream(), toList())));
-    return toBuilder()
-            .classes(classes.stream()
-                    .map(cardClass ->
-                            Optional.ofNullable(seriesToDeprecateByClass.get(cardClass.cardClass))
-                              .map(seriesToDeprecateFromClass -> cardClass.deprecateSeriesByName(seriesToDeprecateFromClass))
-                              .orElse(cardClass)
-                    )
-                    .toList())
-            .build();
+                    seriesRetirementsByClass -> getCardClassByName(seriesRetirementsByClass.cardClass()).cardClass,
+                    flatMapping(seriesRetirementsByClass -> seriesRetirementsByClass.cardSeries().stream(), toList())));
   }
 
   @Override

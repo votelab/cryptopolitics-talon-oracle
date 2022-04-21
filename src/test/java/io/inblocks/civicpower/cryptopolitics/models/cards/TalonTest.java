@@ -3,6 +3,8 @@ package io.inblocks.civicpower.cryptopolitics.models.cards;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardClass;
 import io.inblocks.civicpower.cryptopolitics.models.SelectionResult;
+import io.inblocks.civicpower.cryptopolitics.models.SerieRetirement;
+import io.inblocks.civicpower.cryptopolitics.models.SeriesRetirementsByClass;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,7 @@ class TalonTest {
                         .isInfinite(false)
                         .series(
                             List.of(
-                                new CardSerie("test", 1).pickCard().remainingCards))
+                                new CardSerie("test", 1, false).pickCard().remainingCards))
                         .build()))
             .build();
     long seed = r.nextLong();
@@ -46,7 +48,7 @@ class TalonTest {
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
-                        .series(List.of(new CardSerie("test", 1)))
+                        .series(List.of(new CardSerie("test", 1, false)))
                         .build()))
             .build();
     SelectionResult pick = talon.pickCardByClass(COMMON_CLASS, r.nextLong());
@@ -64,7 +66,7 @@ class TalonTest {
                         .isInfinite(false)
                         .series(
                             List.of(
-                                new CardSerie("test", 1).pickCard().remainingCards))
+                                new CardSerie("test", 1, false).pickCard().remainingCards))
                         .build()))
             .build();
     Talon restoredTalon = talon.addCard(new Card(COMMON_CLASS, "test", 1));
@@ -83,7 +85,7 @@ class TalonTest {
                     CardClass.builder()
                         .cardClass(COMMON_CLASS)
                         .isInfinite(false)
-                        .series(List.of(new CardSerie("test", 1)))
+                        .series(List.of(new CardSerie("test", 1, false)))
                         .build()))
             .build();
     long seed = r.nextLong();
@@ -92,11 +94,11 @@ class TalonTest {
   }
 
   @Test
-  void deprecateSeries() {
-    final CardSerie serieOne = new CardSerie("one", 1);
-    final CardSerie serieTwo = new CardSerie("two", 1);
-    final CardSerie serieThree = new CardSerie("three", 1);
-    final CardSerie serieFour = new CardSerie("four", 1);
+  void retireSeries() {
+    final CardSerie serieOne = new CardSerie("one", 1, false);
+    final CardSerie serieTwo = new CardSerie("two", 1, false);
+    final CardSerie serieThree = new CardSerie("three", 1, false);
+    final CardSerie serieFour = new CardSerie("four", 1, false);
     final Talon talon = Talon.builder()
             .classes(List.of(
                     CardClass.builder()
@@ -111,20 +113,20 @@ class TalonTest {
                             .build()
             ))
             .build();
-    final Talon newTalon = talon.deprecateSeries(List.of(
-            new Talon.ClassDeprecations(COMMON_CLASS, List.of("two")),
-            new Talon.ClassDeprecations(EPIC_CLASS, List.of("three"))));
+    final Talon newTalon = talon.retireSeries(List.of(
+            new SeriesRetirementsByClass(COMMON_CLASS, List.of(new SerieRetirement("two", true))),
+            new SeriesRetirementsByClass(EPIC_CLASS, List.of(new SerieRetirement("three", true)))));
     final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
-    Assertions.assertEquals(List.of(serieOne), newCommonClass.series);
-    Assertions.assertEquals(List.of(serieTwo), newCommonClass.deprecatedSeries);
+    Assertions.assertFalse(newCommonClass.getCardSerieByName("one").retired);
+    Assertions.assertTrue(newCommonClass.getCardSerieByName("two").retired);
     final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
-    Assertions.assertEquals(List.of(serieFour), newEpicClass.series);
-    Assertions.assertEquals(List.of(serieThree), newEpicClass.deprecatedSeries);
+    Assertions.assertFalse(newEpicClass.getCardSerieByName("four").retired);
+    Assertions.assertTrue(newEpicClass.getCardSerieByName("three").retired);
   }
 
   @Test
-  void deprecateSerieFromUnexistingClass() {
-    final CardSerie serieOne = new CardSerie("one", 1);
+  void retireSerieFromUnexistingClass() {
+    final CardSerie serieOne = new CardSerie("one", 1, false);
     final Talon talon = Talon.builder()
             .classes(List.of(
                     CardClass.builder()
@@ -134,6 +136,6 @@ class TalonTest {
                             .build()
             ))
             .build();
-    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.deprecateSeries(List.of(new Talon.ClassDeprecations("FREE", List.of("one")))));
+    Assertions.assertThrows(NoSuchCardClass.class, () -> talon.retireSeries(List.of(new SeriesRetirementsByClass("FREE", List.of(new SerieRetirement("one", true))))));
   }
 }

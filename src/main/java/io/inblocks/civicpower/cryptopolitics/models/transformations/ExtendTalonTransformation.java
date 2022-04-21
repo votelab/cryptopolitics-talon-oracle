@@ -14,6 +14,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Data
@@ -61,7 +62,7 @@ public class ExtendTalonTransformation implements Transformation {
   }
 
     private void checkClassesCompatibility(CardClass cardClassData, CardClass extra) {
-        if (cardClassData.isInfinite != extra.isInfinite)
+        if (!Objects.equals(cardClassData.isInfinite, extra.isInfinite))
             throw new CardClassFinitudeMismatch(extra.cardClass);
     }
 
@@ -75,17 +76,23 @@ public class ExtendTalonTransformation implements Transformation {
               } catch (NoSuchCardSerie e) {
                 return cardSerieData;
               }
-              checkSeriesCompatibility(cardSerieData, extraSerie);
-              final int newSize = cardSerieData.size + extraSerie.size;
-              final BigInteger newSetBitmap =
-                  cardSerieData.setBitmap.or(extraSerie.setBitmap.shiftLeft(cardSerieData.size));
-              return cardSerieData.toBuilder().size(newSize).setBitmap(newSetBitmap).build();
+                return buildMergedSerie(cardSerieData, extraSerie);
             });
   }
+
+    private CardSerie buildMergedSerie(final CardSerie cardSerie, final CardSerie extraSerie) {
+        checkSeriesCompatibility(cardSerie, extraSerie);
+        final int newSize = cardSerie.size + extraSerie.size;
+        final BigInteger newSetBitmap =
+            cardSerie.setBitmap.or(extraSerie.setBitmap.shiftLeft(cardSerie.size));
+        return cardSerie.toBuilder().size(newSize).setBitmap(newSetBitmap).build();
+    }
 
     private void checkSeriesCompatibility(CardSerie cardSerieData, CardSerie extraSerie) {
         if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
             throw new IllegalArgumentException("Additional talon should be totally unused");
+        if (extraSerie.retired != cardSerieData.retired)
+            throw new IllegalArgumentException("Serie retirement mismatch");
     }
 
     private Stream<CardSerie> addNewSeries(CardClass cardClass, CardClass extra) {
