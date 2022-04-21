@@ -121,7 +121,6 @@ components:
     CardClass:
       required:
       - cardClass
-      - deprecatedSeries
       - infinite
       - series
       type: object
@@ -134,14 +133,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CardSerie'
-        deprecatedSeries:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardSerie'
     CardSerie:
       required:
       - initialDealIndex
       - name
+      - retired
       - size
       type: object
       properties:
@@ -150,6 +146,8 @@ components:
         size:
           type: integer
           format: int32
+        retired:
+          type: boolean
         setBitmap:
           type: string
           description: Base64 encoding of the bitmap of cards present
@@ -169,15 +167,6 @@ components:
       - EPIC
       - LEGENDARY
       - ETERNAL
-    DeprecateSeriesTransformation:
-      required:
-      - deprecatedCards
-      type: object
-      properties:
-        deprecatedCards:
-          type: array
-          items:
-            $ref: '#/components/schemas/Talon.ClassDeprecations'
     ExtendTalonTransformation:
       required:
       - additionalCards
@@ -307,16 +296,27 @@ components:
       - $ref: '#/components/schemas/TheCard'
       - $ref: '#/components/schemas/Times'
       - $ref: '#/components/schemas/Together'
-    Talon:
+    SerieRetirement:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - serieName
+        type: object
+        properties:
+          retired:
+            type: boolean
+          serieName:
+            type: string
+    SeriesRetirementTransformation:
       required:
-      - classes
+      - retiredCards
       type: object
       properties:
-        classes:
+        retiredCards:
           type: array
           items:
-            $ref: '#/components/schemas/CardClass'
-    Talon.ClassDeprecations:
+            $ref: '#/components/schemas/SeriesRetirementsByClass'
+    SeriesRetirementsByClass:
       allOf:
       - $ref: '#/components/schemas/Record'
       - required:
@@ -329,7 +329,16 @@ components:
           cardSeries:
             type: array
             items:
-              type: string
+              $ref: '#/components/schemas/SerieRetirement'
+    Talon:
+      required:
+      - classes
+      type: object
+      properties:
+        classes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardClass'
     TalonController.ApplyTransformationQuery:
       required:
       - transformations
@@ -369,11 +378,11 @@ components:
       allOf:
       - $ref: '#/components/schemas/Record'
       - required:
-        - count
         - selection
+        - times
         type: object
         properties:
-          count:
+          times:
             minimum: 0
             type: integer
             format: int32
@@ -398,7 +407,7 @@ components:
       - $ref: '#/components/schemas/AddCardsTransformation'
       - $ref: '#/components/schemas/OpenChestTransformation'
       - $ref: '#/components/schemas/ExtendTalonTransformation'
-      - $ref: '#/components/schemas/DeprecateSeriesTransformation'
+      - $ref: '#/components/schemas/SeriesRetirementTransformation'
     Weighted_Selection_:
       allOf:
       - $ref: '#/components/schemas/Record'
