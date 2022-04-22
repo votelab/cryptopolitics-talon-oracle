@@ -87,7 +87,7 @@ class ExtendTalonTransformationTest extends TransformationTest {
     Assertions.assertEquals(
             talon.getCardClassByName("COMMON").getCardSerieByName("second"),
             cardClass.getCardSerieByName("second"));
-    Assertions.assertTrue(cardClass.getCardSerieByName("clean").retired);
+    Assertions.assertTrue(cardClass.getCardSerieByName("clean").isRetired);
     Assertions.assertNull(transformation.getResults());
   }
 
