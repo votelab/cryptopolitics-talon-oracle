@@ -91,7 +91,7 @@ public class ExtendTalonTransformation implements Transformation {
     private void checkSeriesCompatibility(CardSerie cardSerieData, CardSerie extraSerie) {
         if (extraSerie.count() != extraSerie.size || extraSerie.initialDealIndex != 0)
             throw new IllegalArgumentException("Additional talon should be totally unused");
-        if (extraSerie.retired != cardSerieData.retired)
+        if (extraSerie.isRetired != cardSerieData.isRetired)
             throw new IllegalArgumentException("Serie retirement mismatch");
     }
 

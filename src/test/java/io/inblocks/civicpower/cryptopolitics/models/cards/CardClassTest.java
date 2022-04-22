@@ -128,10 +128,10 @@ class CardClassTest {
                 .series(List.of(serieOne, serieTwo, serieThree, serieFour))
                 .build();
         final CardClass newCardClass = cardClass.retireSeries(List.of(new SerieRetirement("one", true), new SerieRetirement("three", true)));
-        Assertions.assertTrue(newCardClass.getCardSerieByName("one").retired);
-        Assertions.assertFalse(newCardClass.getCardSerieByName("two").retired);
-        Assertions.assertTrue(newCardClass.getCardSerieByName("three").retired);
-        Assertions.assertTrue(newCardClass.getCardSerieByName("four").retired);
+        Assertions.assertTrue(newCardClass.getCardSerieByName("one").isRetired);
+        Assertions.assertFalse(newCardClass.getCardSerieByName("two").isRetired);
+        Assertions.assertTrue(newCardClass.getCardSerieByName("three").isRetired);
+        Assertions.assertTrue(newCardClass.getCardSerieByName("four").isRetired);
     }
 
     @Test

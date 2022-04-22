@@ -117,11 +117,11 @@ class TalonTest {
             new SeriesRetirementsByClass(COMMON_CLASS, List.of(new SerieRetirement("two", true))),
             new SeriesRetirementsByClass(EPIC_CLASS, List.of(new SerieRetirement("three", true)))));
     final CardClass newCommonClass = newTalon.getCardClassByName(COMMON_CLASS);
-    Assertions.assertFalse(newCommonClass.getCardSerieByName("one").retired);
-    Assertions.assertTrue(newCommonClass.getCardSerieByName("two").retired);
+    Assertions.assertFalse(newCommonClass.getCardSerieByName("one").isRetired);
+    Assertions.assertTrue(newCommonClass.getCardSerieByName("two").isRetired);
     final CardClass newEpicClass = newTalon.getCardClassByName(EPIC_CLASS);
-    Assertions.assertFalse(newEpicClass.getCardSerieByName("four").retired);
-    Assertions.assertTrue(newEpicClass.getCardSerieByName("three").retired);
+    Assertions.assertFalse(newEpicClass.getCardSerieByName("four").isRetired);
+    Assertions.assertTrue(newEpicClass.getCardSerieByName("three").isRetired);
   }
 
   @Test

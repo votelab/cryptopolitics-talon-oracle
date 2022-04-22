@@ -53,7 +53,7 @@ public class CardClass {
 
     public PickCardResult pickCard(long seed) {
         final CardSerie serie;
-        final List<CardSerie> activeSeries = series.stream().filter(s -> !s.retired).toList();
+        final List<CardSerie> activeSeries = series.stream().filter(s -> !s.isRetired).toList();
         if (isInfinite) {
             if (activeSeries.isEmpty())
                 throw new CardClassEmpty(cardClass);
@@ -81,7 +81,7 @@ public class CardClass {
     }
 
     public CardClass retireSeries(List<SerieRetirement> seriesRetirements) {
-        Map<String, Boolean> newRetirements = series.stream().collect(Collectors.toMap(serie -> serie.name, serie -> serie.retired));
+        Map<String, Boolean> newRetirements = series.stream().collect(Collectors.toMap(serie -> serie.name, serie -> serie.isRetired));
         for (SerieRetirement serieRetirement : seriesRetirements) {
             if (!newRetirements.containsKey(serieRetirement.serieName()))
                 throw new NoSuchCardSerie(serieRetirement.serieName());
@@ -91,7 +91,7 @@ public class CardClass {
                 .series(series.stream()
                             .map(serie -> {
                                 final Boolean shouldBeRetired = newRetirements.get(serie.name);
-                                return serie.retired != shouldBeRetired ? serie.toBuilder().retired(shouldBeRetired).build() : serie;
+                                return serie.isRetired != shouldBeRetired ? serie.toBuilder().isRetired(shouldBeRetired).build() : serie;
                             })
                             .toList()
                         )
@@ -108,7 +108,7 @@ public class CardClass {
         else {
             int total = 0;
             for (CardSerie serie : series) {
-                if (!serie.retired)
+                if (!serie.isRetired)
                     total += serie.count();
             }
             return total;
