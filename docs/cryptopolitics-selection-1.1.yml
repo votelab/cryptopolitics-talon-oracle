@@ -137,7 +137,6 @@ components:
       required:
       - initialDealIndex
       - name
-      - retired
       - size
       type: object
       properties:
