@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: "1.0"
+  version: "1.1"
 paths:
   /talon/applyTransformations:
     post:
@@ -121,6 +121,7 @@ components:
     CardClass:
       required:
       - cardClass
+      - infinite
       - series
       type: object
       properties:
@@ -144,6 +145,8 @@ components:
         size:
           type: integer
           format: int32
+        retired:
+          type: boolean
         setBitmap:
           type: string
           description: Base64 encoding of the bitmap of cards present
@@ -292,6 +295,40 @@ components:
       - $ref: '#/components/schemas/TheCard'
       - $ref: '#/components/schemas/Times'
       - $ref: '#/components/schemas/Together'
+    SerieRetirement:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - serieName
+        type: object
+        properties:
+          retired:
+            type: boolean
+          serieName:
+            type: string
+    SeriesRetirementTransformation:
+      required:
+      - retiredCards
+      type: object
+      properties:
+        retiredCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesRetirementsByClass'
+    SeriesRetirementsByClass:
+      allOf:
+      - $ref: '#/components/schemas/Record'
+      - required:
+        - cardClass
+        - cardSeries
+        type: object
+        properties:
+          cardClass:
+            type: string
+          cardSeries:
+            type: array
+            items:
+              $ref: '#/components/schemas/SerieRetirement'
     Talon:
       required:
       - classes
@@ -369,6 +406,7 @@ components:
       - $ref: '#/components/schemas/AddCardsTransformation'
       - $ref: '#/components/schemas/OpenChestTransformation'
       - $ref: '#/components/schemas/ExtendTalonTransformation'
+      - $ref: '#/components/schemas/SeriesRetirementTransformation'
     Weighted_Selection_:
       allOf:
       - $ref: '#/components/schemas/Record'

@@ -1,10 +1,12 @@
 package io.inblocks.civicpower.cryptopolitics.models.cards;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.inblocks.civicpower.cryptopolitics.ListUtils;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassEmpty;
 import io.inblocks.civicpower.cryptopolitics.exceptions.CardClassFinitudeMismatch;
 import io.inblocks.civicpower.cryptopolitics.exceptions.NoSuchCardSerie;
+import io.inblocks.civicpower.cryptopolitics.models.SerieRetirement;
 import io.inblocks.civicpower.cryptopolitics.models.Weighted;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Builder;
@@ -13,7 +15,9 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Data
 @Introspected
@@ -23,7 +27,7 @@ public class CardClass {
     public final String cardClass;
     @Valid @NotNull @JsonProperty(value="infinite")
     public final Boolean isInfinite;
-    @Valid @NotNull
+    @Valid @NotNull @JsonInclude(JsonInclude.Include.ALWAYS)
     public final List<CardSerie> series;
 
     static final long LONG_MASK = 0xffffffffL;
@@ -49,13 +53,14 @@ public class CardClass {
 
     public PickCardResult pickCard(long seed) {
         final CardSerie serie;
+        final List<CardSerie> activeSeries = series.stream().filter(s -> !s.isRetired).toList();
         if (isInfinite) {
-            if (series.isEmpty())
+            if (activeSeries.isEmpty())
                 throw new CardClassEmpty(cardClass);
-            serie = series.get((int) ((seed & LONG_MASK) % series.size()));
+            serie = activeSeries.get((int) ((seed & LONG_MASK) % activeSeries.size()));
         } else {
             try {
-                serie = Weighted.select(series.stream().map(s -> new Weighted<>(s, s.count())).toList(), seed);
+                serie = Weighted.select(activeSeries.stream().map(s -> new Weighted<>(s, s.count())).toList(), seed);
             } catch (IllegalArgumentException e) {
                 throw new CardClassEmpty(cardClass);
             }
@@ -70,7 +75,27 @@ public class CardClass {
     public CardClass addCard(Card card) throws NoSuchCardSerie {
         final CardSerie serieToExtend = getCardSerieByName(card.serieName);
         final CardSerie extendedSerie = serieToExtend.addCard(card.orderNumber);
-        return toBuilder().series(ListUtils.subst(series, serieToExtend, extendedSerie)).build();
+        return toBuilder()
+            .series(ListUtils.subst(series, serieToExtend, extendedSerie))
+            .build();
+    }
+
+    public CardClass retireSeries(List<SerieRetirement> seriesRetirements) {
+        Map<String, Boolean> newRetirements = series.stream().collect(Collectors.toMap(serie -> serie.name, serie -> serie.isRetired));
+        for (SerieRetirement serieRetirement : seriesRetirements) {
+            if (!newRetirements.containsKey(serieRetirement.serieName()))
+                throw new NoSuchCardSerie(serieRetirement.serieName());
+            newRetirements.put(serieRetirement.serieName(), serieRetirement.isRetired());
+        }
+        return toBuilder()
+                .series(series.stream()
+                            .map(serie -> {
+                                final Boolean shouldBeRetired = newRetirements.get(serie.name);
+                                return serie.isRetired != shouldBeRetired ? serie.toBuilder().isRetired(shouldBeRetired).build() : serie;
+                            })
+                            .toList()
+                        )
+                .build();
     }
 
     public CardSerie getCardSerieByName(final String name) throws NoSuchCardSerie {
@@ -83,7 +108,8 @@ public class CardClass {
         else {
             int total = 0;
             for (CardSerie serie : series) {
-                total += serie.count();
+                if (!serie.isRetired)
+                    total += serie.count();
             }
             return total;
         }
